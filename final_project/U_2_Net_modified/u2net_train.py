@@ -8,7 +8,7 @@ from torch.utils.data import Dataset, DataLoader
 from torchvision import transforms, utils
 import torch.optim as optim
 import torchvision.transforms as standard_transforms
-
+import time
 import numpy as np
 import glob
 
@@ -54,7 +54,10 @@ tra_label_dir = r'../../../datasets/DUTS-TR/DUTS-TR-Mask/'  #os.path.join('DUTS'
 image_ext = '.jpg'
 label_ext = '.png'
 
-model_dir = os.path.join(os.getcwd(), 'saved_models', model_name + os.sep)
+# model_dir = os.path.join(os.getcwd(), 'saved_models', model_name + os.sep)
+cur_date_time = time.strftime("%Y.%m.%d-%H.%M")
+model_dir = os.path.join(r'../../../final_project_results/models/', cur_date_time) + os.sep
+os.makedirs(model_dir, exist_ok=True)
 
 epoch_num = 100000
 batch_size_train = 12
@@ -115,6 +118,7 @@ running_loss = 0.0
 running_tar_loss = 0.0
 ite_num4val = 0
 save_frq = 2000  # save the model every 2000 iterations
+# save_frq = 5  # save the model every 2000 iterations
 
 for epoch in range(0, epoch_num):
     net.train()
