@@ -1,7 +1,9 @@
 import os
 from skimage import io, transform
 import torch
+import time
 import torchvision
+import matplotlib.pyplot as plt
 from torch.autograd import Variable
 import torch.nn as nn
 import torch.nn.functional as F
@@ -31,7 +33,7 @@ def normPRED(d):
     return dn
 
 def save_output(image_name,pred,d_dir):
-
+    test_label_full_path = r'/media/nadav/datasets/DUTS-TE/DUTS-TE-Mask'
     predict = pred
     predict = predict.squeeze()
     predict_np = predict.cpu().data.numpy()
@@ -49,18 +51,41 @@ def save_output(image_name,pred,d_dir):
     for i in range(1,len(bbb)):
         imidx = imidx + "." + bbb[i]
 
-    imo.save(d_dir+imidx+'.png')
+    test_mask = io.imread(os.path.join(test_label_full_path,os.path.basename(image_name)).replace('.jpg', '.png'))
+    # conc_im = np.hstack((image, imo, test_mask))
+
+    # imo.save(d_dir+imidx+'.png')
+    # conc_im.save(d_dir+imidx+'.png')
+
+    plt.figure(figsize=[15, 10], dpi=500)
+    plt.subplot(1,3,1)
+    plt.imshow(image)
+    plt.title('image')
+    plt.subplot(1,3,2)
+    plt.imshow(imo)
+    plt.title('prediction')
+    plt.subplot(1,3,3)
+    plt.imshow(test_mask)
+    plt.title('mask')
+    plt.savefig(d_dir+imidx+'.png', dpi=300)
+    plt.close('all')
+
 
 def main():
 
     # --------- 1. get image path and name ---------
     model_name='u2net'#u2netp
+    os.environ["CUDA_VISIBLE_DEVICES"] = "1"
 
-
-
-    image_dir = os.path.join(os.getcwd(), 'test_data', 'test_images')
-    prediction_dir = os.path.join(os.getcwd(), 'test_data', model_name + '_results' + os.sep)
-    model_dir = os.path.join(os.getcwd(), 'saved_models', model_name, model_name + '.pth')
+    image_ = r'../../../datasets/DUTS-TE/DUTS-TE-Image/'
+    image_dir = image_
+    # image_dir = os.path.join(os.getcwd(), 'test_data', 'test_images')
+    # prediction_dir = os.path.join(os.getcwd(), 'test_data', model_name + '_results' + os.sep)
+    prediction_dir = r'/media/nadav/final_project_results/prediction/'
+    cur_date_time = time.strftime("%Y.%m.%d-%H.%M")
+    prediction_dir = os.path.join(prediction_dir, cur_date_time) + os.sep
+    # model_dir = os.path.join(os.getcwd(), 'saved_models', model_name, model_name + '.pth')
+    model_dir = r'/media/nadav/final_project_results/models/2021.01.19-19.49/u2net_bce_itr_8000_train_1.269442_tar_0.166543.pth'
 
     img_name_list = glob.glob(image_dir + os.sep + '*')
     print(img_name_list)
