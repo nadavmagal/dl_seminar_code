@@ -8,7 +8,7 @@ from torch.utils.data import Dataset, DataLoader
 from torchvision import transforms, utils
 import torch.optim as optim
 import torchvision.transforms as standard_transforms
-
+import time
 import numpy as np
 import glob
 
@@ -37,9 +37,9 @@ def muti_bce_loss_fusion(d0, d1, d2, d3, d4, d5, d6, labels_v):
     loss6 = bce_loss(d6, labels_v)
 
     loss = loss0 + loss1 + loss2 + loss3 + loss4 + loss5 + loss6
-    print("l0: %3f, l1: %3f, l2: %3f, l3: %3f, l4: %3f, l5: %3f, l6: %3f\n" % (
-    loss0.data[0], loss1.data[0], loss2.data[0], loss3.data[0], loss4.data[0], loss5.data[0], loss6.data[0]))
-
+    # print("l0: %3f, l1: %3f, l2: %3f, l3: %3f, l4: %3f, l5: %3f, l6: %3f\n" % (
+    # # loss0.data[0], loss1.data[0], loss2.data[0], loss3.data[0], loss4.data[0], loss5.data[0], loss6.data[0]))
+    # loss0.item(), loss1.item(), loss2.item(), loss3.item(), loss4.item(), loss5.item(), loss6.item()))
     return loss0, loss
 
 
@@ -48,13 +48,16 @@ def muti_bce_loss_fusion(d0, d1, d2, d3, d4, d5, d6, labels_v):
 model_name = 'u2net'  # 'u2netp'
 
 data_dir = os.path.join(os.getcwd(), 'train_data' + os.sep)
-tra_image_dir = os.path.join('DUTS', 'DUTS-TR', 'DUTS-TR', 'im_aug' + os.sep)
-tra_label_dir = os.path.join('DUTS', 'DUTS-TR', 'DUTS-TR', 'gt_aug' + os.sep)
+tra_image_dir = r'../../../datasets/DUTS-TR/DUTS-TR-Image/'  #os.path.join('DUTS', 'DUTS-TR', 'DUTS-TR', 'im_aug' + os.sep)
+tra_label_dir = r'../../../datasets/DUTS-TR/DUTS-TR-Mask/'  #os.path.join('DUTS', 'DUTS-TR', 'DUTS-TR', 'gt_aug' + os.sep)
 
 image_ext = '.jpg'
 label_ext = '.png'
 
-model_dir = os.path.join(os.getcwd(), 'saved_models', model_name + os.sep)
+# model_dir = os.path.join(os.getcwd(), 'saved_models', model_name + os.sep)
+cur_date_time = time.strftime("%Y.%m.%d-%H.%M")
+model_dir = os.path.join(r'../../../final_project_results/models/', cur_date_time) + os.sep
+os.makedirs(model_dir, exist_ok=True)
 
 epoch_num = 100000
 batch_size_train = 12
@@ -62,7 +65,8 @@ batch_size_val = 1
 train_num = 0
 val_num = 0
 
-tra_img_name_list = glob.glob(data_dir + tra_image_dir + '*' + image_ext)
+# tra_img_name_list = glob.glob(data_dir + tra_image_dir + '*' + image_ext)
+tra_img_name_list = glob.glob(tra_image_dir + '*' + image_ext)
 
 tra_lbl_name_list = []
 for img_path in tra_img_name_list:
@@ -74,7 +78,8 @@ for img_path in tra_img_name_list:
     for i in range(1, len(bbb)):
         imidx = imidx + "." + bbb[i]
 
-    tra_lbl_name_list.append(data_dir + tra_label_dir + imidx + label_ext)
+    # tra_lbl_name_list.append(data_dir + tra_label_dir + imidx + label_ext)
+    tra_lbl_name_list.append(tra_label_dir + imidx + label_ext)
 
 print("---")
 print("train images: ", len(tra_img_name_list))
@@ -113,6 +118,7 @@ running_loss = 0.0
 running_tar_loss = 0.0
 ite_num4val = 0
 save_frq = 2000  # save the model every 2000 iterations
+# save_frq = 5  # save the model every 2000 iterations
 
 for epoch in range(0, epoch_num):
     net.train()
@@ -144,17 +150,21 @@ for epoch in range(0, epoch_num):
         optimizer.step()
 
         # # print statistics
-        running_loss += loss.data[0]
-        running_tar_loss += loss2.data[0]
+        # running_loss += loss.data[0]
+        running_loss += loss.item()
+        # running_tar_loss += loss2.data[0]
+        running_tar_loss += loss2.item()
 
         # del temporary outputs and loss
         del d0, d1, d2, d3, d4, d5, d6, loss2, loss
 
-        print("[epoch: %3d/%3d, batch: %5d/%5d, ite: %d] train loss: %3f, tar: %3f " % (
-            epoch + 1, epoch_num, (i + 1) * batch_size_train, train_num, ite_num, running_loss / ite_num4val,
-            running_tar_loss / ite_num4val))
+        if ite_num % 20 == 0:
+            print("[epoch: %3d/%3d, batch: %5d/%5d, ite: %d] train loss: %3f, tar: %3f " % (
+                epoch + 1, epoch_num, (i + 1) * batch_size_train, train_num, ite_num, running_loss / ite_num4val,
+                running_tar_loss / ite_num4val))
 
         if ite_num % save_frq == 0:
+
             torch.save(net.state_dict(), model_dir + model_name + "_bce_itr_%d_train_%3f_tar_%3f.pth" % (
             ite_num, running_loss / ite_num4val, running_tar_loss / ite_num4val))
             running_loss = 0.0
