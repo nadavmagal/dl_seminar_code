@@ -85,7 +85,7 @@ def main():
     cur_date_time = time.strftime("%Y.%m.%d-%H.%M")
     prediction_dir = os.path.join(prediction_dir, cur_date_time) + os.sep
     # model_dir = os.path.join(os.getcwd(), 'saved_models', model_name, model_name + '.pth')
-    model_dir = r'/media/nadav/final_project_results/models/2021.01.19-19.49/u2net_bce_itr_88000_train_0.301114_tar_0.028957'
+    model_dir = r'/media/nadav/final_project_results/models/2021.01.19-19.49/u2net_bce_itr_94000_train_0.300097_tar_0.028924.pth'
 
     img_name_list = glob.glob(image_dir + os.sep + '*')
     print(img_name_list)
