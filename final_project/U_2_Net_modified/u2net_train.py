@@ -163,11 +163,10 @@ for epoch in range(0, epoch_num):
                 epoch + 1, epoch_num, (i + 1) * batch_size_train, train_num, ite_num, running_loss / ite_num4val,
                 running_tar_loss / ite_num4val))
 
-        if ite_num % save_frq == 0:
-
-            torch.save(net.state_dict(), model_dir + model_name + "_bce_itr_%d_train_%3f_tar_%3f.pth" % (
-            ite_num, running_loss / ite_num4val, running_tar_loss / ite_num4val))
-            running_loss = 0.0
-            running_tar_loss = 0.0
-            net.train()  # resume train
-            ite_num4val = 0
+    # torch.save(net.state_dict(), model_dir + model_name + "_bce_itr_%d_train_%3f_tar_%3f.pth" % (
+    # ite_num, running_loss / ite_num4val, running_tar_loss / ite_num4val))
+    torch.save(net.state_dict(), model_dir + model_name + f"_ephoch_{epoch}_bce_itr_{ite_num}_train_{running_loss / ite_num4val}_tar_{running_tar_loss / ite_num4val}.pth" )
+    running_loss = 0.0
+    running_tar_loss = 0.0
+    net.train()  # resume train
+    ite_num4val = 0
