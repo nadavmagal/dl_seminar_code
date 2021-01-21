@@ -197,5 +197,7 @@ for epoch in range(start_epoch, epoch_num):
     net.train()  # resume train
     ite_num4val = 0
 
-    writer.add_scalars('loss_tar', {'train_tar': running_tar_loss,
-                                    'train': running_loss}, epoch)
+    writer.add_scalars('loss_tar', {'train_tar': running_tar_loss / ite_num4val}, epoch + 1)
+    writer.add_scalars('loss', {'train': running_loss / ite_num4val}, epoch + 1)
+
+# tensorboard --logdir=<path_to_log>

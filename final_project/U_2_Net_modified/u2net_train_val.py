@@ -13,7 +13,6 @@ import numpy as np
 import glob
 from torch.utils.tensorboard import SummaryWriter
 
-
 from data_loader import Rescale
 from data_loader import RescaleT
 from data_loader import RandomCrop
@@ -214,8 +213,9 @@ for epoch in range(0, epoch_num):
             'loss': running_loss / ite_num4val,
         }, cur_save_model_full_path)
 
-    writer.add_scalars('loss_tar', {'train': running_tar_loss,
-                                'val': val_tar_loss}, epoch)
+    print(running_tar_loss, val_tar_loss)
+    writer.add_scalars('loss_tar', {'train': running_tar_loss / ite_num4val,
+                                    'val': val_tar_loss}, epoch)
 
     running_loss = 0.0
     running_tar_loss = 0.0
