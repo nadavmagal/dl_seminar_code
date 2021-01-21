@@ -49,8 +49,8 @@ def muti_bce_loss_fusion(d0, d1, d2, d3, d4, d5, d6, labels_v):
 model_name = 'u2netp'
 
 data_dir = os.path.join(os.getcwd(), 'train_data' + os.sep)
-tra_image_dir = r'../../../datasets/DUTS_sample/DUTS-TR-Image/'  # os.path.join('DUTS', 'DUTS-TR', 'DUTS-TR', 'im_aug' + os.sep)
-tra_label_dir = r'../../../datasets/DUTS_sample/DUTS-TR-Mask/'  # os.path.join('DUTS', 'DUTS-TR', 'DUTS-TR', 'gt_aug' + os.sep)
+tra_image_dir = r'../../../datasets/DUTS-TR/DUTS-TR-Image/'  # os.path.join('DUTS', 'DUTS-TR', 'DUTS-TR', 'im_aug' + os.sep)
+tra_label_dir = r'../../../datasets/DUTS-TR/DUTS-TR-Mask/'  # os.path.join('DUTS', 'DUTS-TR', 'DUTS-TR', 'gt_aug' + os.sep)
 
 image_ext = '.jpg'
 label_ext = '.png'
@@ -66,12 +66,15 @@ batch_size_train = 2
 batch_size_val = 1  # might work only with 1
 train_num = 0
 val_num = 0
+checkpoint_model_path = None
+# checkpoint_model_path = r'/home/nadav/dl_seminar/final_project_results/models/2021.01.21-18.55/u2netp_ephoch_1_bce_itr_100_train_3.5880941772460937_tar_0.5038655388355255.pth'
+
 
 # tra_img_name_list = glob.glob(data_dir + tra_image_dir + '*' + image_ext)
 tra_img_name_list = glob.glob(tra_image_dir + '*' + image_ext)
 
 tra_lbl_name_list = []
-for img_path in tra_img_name_list:
+for img_path in tra_img_name_list[:100]:
     img_name = img_path.split(os.sep)[-1]
 
     aaa = img_name.split(".")
@@ -130,6 +133,14 @@ print("---define optimizer...")
 optimizer = optim.Adam(net.parameters(), lr=0.001, betas=(0.9, 0.999), eps=1e-08, weight_decay=0)
 
 # ------- 5. training process --------
+start_epoch = 0
+if checkpoint_model_path is not None:
+    checkpoint = torch.load(checkpoint_model_path)
+    net.load_state_dict(checkpoint['model_state_dict'])
+    optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
+    start_epoch = checkpoint['epoch']
+    loss = checkpoint['loss'] + 1
+
 print("---start training...")
 ite_num = 0
 running_loss = 0.0
@@ -176,7 +187,7 @@ for epoch in range(0, epoch_num):
         # del temporary outputs and loss
         del d0, d1, d2, d3, d4, d5, d6, loss2, loss
 
-        if ite_num % 5 == 0:
+        if ite_num % 20 == 0:
             print("[epoch: %3d/%3d, batch: %5d/%5d, ite: %d] train loss: %3f, tar: %3f " % (
                 epoch + 1, epoch_num, (i + 1) * batch_size_train, train_num, ite_num, running_loss / ite_num4val,
                 running_tar_loss / ite_num4val))
@@ -186,8 +197,14 @@ for epoch in range(0, epoch_num):
     print("[epoch: %3d/%3d val loss: %3f, tar: %3f " % (epoch + 1, epoch_num, val_loss, val_tar_loss))
 
     if epoch % 10 == 0:
-        torch.save(net.state_dict(), model_dir + model_name + "_bce_itr_%d_train_%3f_tar_%3f.pth" % (
-            ite_num, running_loss / ite_num4val, running_tar_loss / ite_num4val))
+        cur_save_model_full_path = model_dir + model_name + f"_ephoch_{epoch}_bce_itr_{ite_num}_train_{running_loss / ite_num4val}_tar_{running_tar_loss / ite_num4val}.pth"
+        # torch.save(net.state_dict(), cur_save_model_full_path)
+        torch.save({
+            'epoch': epoch,
+            'model_state_dict': net.state_dict(),
+            'optimizer_state_dict': optimizer.state_dict(),
+            'loss': running_loss / ite_num4val,
+        }, cur_save_model_full_path)
 
     running_loss = 0.0
     running_tar_loss = 0.0
