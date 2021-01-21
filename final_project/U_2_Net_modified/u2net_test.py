@@ -33,7 +33,8 @@ def normPRED(d):
     return dn
 
 def save_output(image_name,pred,d_dir):
-    test_label_full_path = r'/media/nadav/datasets/DUTS-TE/DUTS-TE-Mask'
+    # test_label_full_path = r'/media/nadav/datasets/DUTS-TE/DUTS-TE-Mask'
+    test_label_full_path = r'/home/nadav/dl_seminar/datasets/DUTS-TE/DUTS-TE-Mask'
     predict = pred
     predict = predict.squeeze()
     predict_np = predict.cpu().data.numpy()
@@ -74,18 +75,22 @@ def save_output(image_name,pred,d_dir):
 def main():
 
     # --------- 1. get image path and name ---------
-    model_name='u2net'#u2netp
-    os.environ["CUDA_VISIBLE_DEVICES"] = "1"
+    # model_name='u2net'#u2netp
+    model_name= 'u2netp'
+
+    # os.environ["CUDA_VISIBLE_DEVICES"] = "1"
 
     image_ = r'../../../datasets/DUTS-TE/DUTS-TE-Image/'
     image_dir = image_
     # image_dir = os.path.join(os.getcwd(), 'test_data', 'test_images')
     # prediction_dir = os.path.join(os.getcwd(), 'test_data', model_name + '_results' + os.sep)
-    prediction_dir = r'/media/nadav/final_project_results/prediction/'
+    # prediction_dir = r'/media/nadav/final_project_results/prediction/'
+    prediction_dir = r'/home/nadav/dl_seminar/final_project_results/prediction/'
     cur_date_time = time.strftime("%Y.%m.%d-%H.%M")
     prediction_dir = os.path.join(prediction_dir, cur_date_time) + os.sep
     # model_dir = os.path.join(os.getcwd(), 'saved_models', model_name, model_name + '.pth')
-    model_dir = r'/media/nadav/final_project_results/models/2021.01.19-19.49/u2net_bce_itr_94000_train_0.300097_tar_0.028924.pth'
+    # model_dir = r'/media/nadav/final_project_results/models/2021.01.19-19.49/u2net_bce_itr_94000_train_0.300097_tar_0.028924.pth'
+    model_dir = r'/home/nadav/dl_seminar/final_project_results/models/2021.01.21-18.03/u2netp_ephoch_1_bce_itr_100_train_3.661501111984253_tar_0.5364890599250793.pth'
 
     img_name_list = glob.glob(image_dir + os.sep + '*')
     print(img_name_list)
