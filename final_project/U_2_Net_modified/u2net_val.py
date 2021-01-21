@@ -66,4 +66,4 @@ def validation_epoch(net, salobj_val_dataloader):
 
         del d0, d1, d2, d3, d4, d5, d6, loss2, loss
 
-    return val_loss, val_tar_loss
+    return val_loss / i_test, val_tar_loss / i_test

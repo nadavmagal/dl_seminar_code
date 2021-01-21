@@ -11,6 +11,8 @@ import torchvision.transforms as standard_transforms
 import time
 import numpy as np
 import glob
+from torch.utils.tensorboard import SummaryWriter
+
 
 from data_loader import Rescale
 from data_loader import RescaleT
@@ -58,7 +60,13 @@ label_ext = '.png'
 # model_dir = os.path.join(os.getcwd(), 'saved_models', model_name + os.sep)
 cur_date_time = time.strftime("%Y.%m.%d-%H.%M")
 model_dir = os.path.join(r'../../../final_project_results/models/', cur_date_time) + os.sep
+log_dir = os.path.join(r'../../../final_project_results/logs/', cur_date_time) + os.sep
+
 os.makedirs(model_dir, exist_ok=True)
+os.makedirs(log_dir, exist_ok=True)
+
+# initialize tensorboard
+writer = SummaryWriter(log_dir)
 
 epoch_num = 100000
 val_portion = 0.2
@@ -71,10 +79,10 @@ checkpoint_model_path = None
 
 
 # tra_img_name_list = glob.glob(data_dir + tra_image_dir + '*' + image_ext)
-tra_img_name_list = glob.glob(tra_image_dir + '*' + image_ext)
+tra_img_name_list = glob.glob(tra_image_dir + '*' + image_ext)[:100]
 
 tra_lbl_name_list = []
-for img_path in tra_img_name_list[:100]:
+for img_path in tra_img_name_list:
     img_name = img_path.split(os.sep)[-1]
 
     aaa = img_name.split(".")
@@ -206,6 +214,11 @@ for epoch in range(0, epoch_num):
             'loss': running_loss / ite_num4val,
         }, cur_save_model_full_path)
 
+    writer.add_scalars('loss_tar', {'train': running_tar_loss,
+                                'val': val_tar_loss}, epoch)
+
     running_loss = 0.0
     running_tar_loss = 0.0
     ite_num4val = 0
+
+# tensorboard --logdir=<path_to_log>
