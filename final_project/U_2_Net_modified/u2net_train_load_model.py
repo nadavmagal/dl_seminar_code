@@ -11,6 +11,7 @@ import torchvision.transforms as standard_transforms
 import time
 import numpy as np
 import glob
+from torch.utils.tensorboard import SummaryWriter
 
 from data_loader import Rescale
 from data_loader import RescaleT
@@ -58,7 +59,12 @@ label_ext = '.png'
 # model_dir = os.path.join(os.getcwd(), 'saved_models', model_name + os.sep)
 cur_date_time = time.strftime("%Y.%m.%d-%H.%M")
 model_dir = os.path.join(r'../../../final_project_results/models/', cur_date_time) + os.sep
+log_dir = os.path.join(r'../../../final_project_results/logs/', cur_date_time) + os.sep
 os.makedirs(model_dir, exist_ok=True)
+os.makedirs(log_dir, exist_ok=True)
+
+# initialize tensorboard
+writer = SummaryWriter(log_dir)
 
 epoch_num = 100000
 batch_size_train = 12 # default 12
@@ -123,7 +129,6 @@ if checkpoint_model_path is not None:
     optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
     start_epoch = checkpoint['epoch']
     loss = checkpoint['loss'] + 1
-
 
 print("---start training...")
 ite_num = 0
@@ -191,3 +196,8 @@ for epoch in range(start_epoch, epoch_num):
     running_tar_loss = 0.0
     net.train()  # resume train
     ite_num4val = 0
+
+    writer.add_scalars('loss_tar', {'train_tar': running_tar_loss / ite_num4val}, epoch + 1)
+    writer.add_scalars('loss', {'train': running_loss / ite_num4val}, epoch + 1)
+
+# tensorboard --logdir=<path_to_log>
