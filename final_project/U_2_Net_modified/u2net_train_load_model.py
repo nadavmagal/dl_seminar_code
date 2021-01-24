@@ -23,7 +23,7 @@ from model import U2NET
 from model import U2NETP
 
 # ------- 1. define loss function --------
-
+# os.environ["CUDA_VISIBLE_DEVICES"] = "1"
 bce_loss = nn.BCELoss(size_average=True)
 
 
@@ -61,7 +61,7 @@ model_dir = os.path.join(r'../../../final_project_results/models/', cur_date_tim
 os.makedirs(model_dir, exist_ok=True)
 
 epoch_num = 100000
-batch_size_train = 2
+batch_size_train = 12 # default 12
 batch_size_val = 1
 train_num = 0
 val_num = 0
@@ -70,7 +70,7 @@ checkpoint_model_path = None
 
 # tra_img_name_list = glob.glob(data_dir + tra_image_dir + '*' + image_ext)
 tra_img_name_list = glob.glob(tra_image_dir + '*' + image_ext)
-tra_img_name_list = tra_img_name_list[:100]  # TODO: be carful and remove this
+# tra_img_name_list = tra_img_name_list[:100]  # TODO: be carful and remove this
 
 tra_lbl_name_list = []
 for img_path in tra_img_name_list:
@@ -171,12 +171,12 @@ for epoch in range(start_epoch, epoch_num):
         # del temporary outputs and loss
         del d0, d1, d2, d3, d4, d5, d6, loss2, loss
 
-        if ite_num % 20 == 0:
+        if ite_num % 1000 == 0:
             print("[epoch: %3d/%3d, batch: %5d/%5d, ite: %d] train loss: %3f, tar: %3f " % (
                 epoch + 1, epoch_num, (i + 1) * batch_size_train, train_num, ite_num, running_loss / ite_num4val,
                 running_tar_loss / ite_num4val))
 
-    if epoch % 1 == 0:
+    if epoch % 3 == 0:
         cur_save_model_full_path = model_dir + model_name + f"_ephoch_{epoch}_bce_itr_{ite_num}_train_{running_loss / ite_num4val}_tar_{running_tar_loss / ite_num4val}.pth"
         # torch.save(net.state_dict(), cur_save_model_full_path)
         torch.save({

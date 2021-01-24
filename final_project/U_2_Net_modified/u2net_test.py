@@ -11,6 +11,7 @@ from torch.utils.data import Dataset, DataLoader
 from torchvision import transforms#, utils
 # import torch.optim as optim
 
+import json
 import numpy as np
 from PIL import Image
 import glob
@@ -33,8 +34,7 @@ def normPRED(d):
     return dn
 
 def save_output(image_name,pred,d_dir):
-    # test_label_full_path = r'/media/nadav/datasets/DUTS-TE/DUTS-TE-Mask'
-    test_label_full_path = r'/home/nadav/dl_seminar/datasets/DUTS-TE/DUTS-TE-Mask'
+    test_label_full_path = r'../../..//datasets/DUTS-TE/DUTS-TE-Mask'
     predict = pred
     predict = predict.squeeze()
     predict_np = predict.cpu().data.numpy()
@@ -84,13 +84,19 @@ def main():
     image_dir = image_
     # image_dir = os.path.join(os.getcwd(), 'test_data', 'test_images')
     # prediction_dir = os.path.join(os.getcwd(), 'test_data', model_name + '_results' + os.sep)
-    # prediction_dir = r'/media/nadav/final_project_results/prediction/'
-    prediction_dir = r'/home/nadav/dl_seminar/final_project_results/prediction/'
+    prediction_dir = r'../../../final_project_results/prediction/'
+    # prediction_dir = r'/home/nadav/dl_seminar/final_project_results/prediction/'
     cur_date_time = time.strftime("%Y.%m.%d-%H.%M")
     prediction_dir = os.path.join(prediction_dir, cur_date_time) + os.sep
+    if not os.path.exists(prediction_dir):
+        os.makedirs(prediction_dir, exist_ok=True)
     # model_dir = os.path.join(os.getcwd(), 'saved_models', model_name, model_name + '.pth')
     # model_dir = r'/media/nadav/final_project_results/models/2021.01.19-19.49/u2net_bce_itr_94000_train_0.300097_tar_0.028924.pth'
-    model_dir = r'/home/nadav/dl_seminar/final_project_results/models/2021.01.21-18.03/u2netp_ephoch_1_bce_itr_100_train_3.661501111984253_tar_0.5364890599250793.pth'
+    # model_dir = r'../../../final_project_results/models/2021.01.22-12.01/u2netp_ephoch_318_bce_itr_280720_train_0.3595311115919189_tar_0.033946142557331103.pth'
+    model_dir = r'/media/nadav/final_project_results/models/2021.01.22-12.01/u2netp_ephoch_504_bce_itr_444400_train_0.3133861400017684_tar_0.02861546263818375.pth'
+    params_to_save = dict()
+    params_to_save['model_path'] = model_dir
+    json.dump(params_to_save, open(prediction_dir+'models_params.json','w'))
 
     img_name_list = glob.glob(image_dir + os.sep + '*')
     print(img_name_list)
@@ -114,7 +120,11 @@ def main():
     elif(model_name=='u2netp'):
         print("...load U2NEP---4.7 MB")
         net = U2NETP(3,1)
-    net.load_state_dict(torch.load(model_dir))
+
+    # net.load_state_dict(torch.load(c))
+    checkpoint = torch.load(model_dir)
+    net.load_state_dict(checkpoint['model_state_dict'])
+
     if torch.cuda.is_available():
         net.cuda()
     net.eval()
@@ -139,8 +149,6 @@ def main():
         pred = normPRED(pred)
 
         # save results to test_results folder
-        if not os.path.exists(prediction_dir):
-            os.makedirs(prediction_dir, exist_ok=True)
         save_output(img_name_list[i_test],pred,prediction_dir)
 
         del d1,d2,d3,d4,d5,d6,d7

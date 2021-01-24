@@ -59,7 +59,7 @@ def validation_epoch(net, salobj_val_dataloader):
 
         d0, d1, d2, d3, d4, d5, d6 = net(inputs_test)
 
-        loss2, loss = muti_bce_loss_fusion(d0, d1, d2, d3, d4, d5, d6, labels_test)
+        loss2, loss = muti_bce_loss_fusion(d0, d1, d2, d3, d4, d5, d6, labels)
 
         val_loss += loss.item()
         val_tar_loss += loss2.item()

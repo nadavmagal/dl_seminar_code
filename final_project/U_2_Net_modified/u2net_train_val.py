@@ -24,6 +24,7 @@ from model import U2NET
 from model import U2NETP
 
 # ------- 1. define loss function --------
+os.environ["CUDA_VISIBLE_DEVICES"] = "1"
 
 bce_loss = nn.BCELoss(size_average=True)
 
@@ -66,15 +67,15 @@ batch_size_train = 2
 batch_size_val = 1  # might work only with 1
 train_num = 0
 val_num = 0
-checkpoint_model_path = None
-# checkpoint_model_path = r'/home/nadav/dl_seminar/final_project_results/models/2021.01.21-18.55/u2netp_ephoch_1_bce_itr_100_train_3.5880941772460937_tar_0.5038655388355255.pth'
+# checkpoint_model_path = None
+checkpoint_model_path = r'/media/nadav/final_project_results/models/2021.01.22-20.24/u2netp_ephoch_60_bce_itr_257542_train_0.6749123306614084_tar_0.07845910467427579_valloss_1971.7270900681615.pth'
 
 
 # tra_img_name_list = glob.glob(data_dir + tra_image_dir + '*' + image_ext)
 tra_img_name_list = glob.glob(tra_image_dir + '*' + image_ext)
 
 tra_lbl_name_list = []
-for img_path in tra_img_name_list[:100]:
+for img_path in tra_img_name_list:
     img_name = img_path.split(os.sep)[-1]
 
     aaa = img_name.split(".")
@@ -149,7 +150,7 @@ ite_num4val = 0
 save_frq = 2000  # save the model every 2000 iterations
 # save_frq = 5  # save the model every 2000 iterations
 
-for epoch in range(0, epoch_num):
+for epoch in range(start_epoch, epoch_num):
     net.train()
 
     for i, data in enumerate(salobj_dataloader):
@@ -187,7 +188,7 @@ for epoch in range(0, epoch_num):
         # del temporary outputs and loss
         del d0, d1, d2, d3, d4, d5, d6, loss2, loss
 
-        if ite_num % 20 == 0:
+        if ite_num % 1000 == 0:
             print("[epoch: %3d/%3d, batch: %5d/%5d, ite: %d] train loss: %3f, tar: %3f " % (
                 epoch + 1, epoch_num, (i + 1) * batch_size_train, train_num, ite_num, running_loss / ite_num4val,
                 running_tar_loss / ite_num4val))
@@ -196,8 +197,8 @@ for epoch in range(0, epoch_num):
     val_loss, val_tar_loss = validation_epoch(net, salobj_val_dataloader)
     print("[epoch: %3d/%3d val loss: %3f, tar: %3f " % (epoch + 1, epoch_num, val_loss, val_tar_loss))
 
-    if epoch % 10 == 0:
-        cur_save_model_full_path = model_dir + model_name + f"_ephoch_{epoch}_bce_itr_{ite_num}_train_{running_loss / ite_num4val}_tar_{running_tar_loss / ite_num4val}.pth"
+    if epoch % 3 == 0:
+        cur_save_model_full_path = model_dir + model_name + f"_ephoch_{epoch}_bce_itr_{ite_num}_train_{running_loss / ite_num4val}_tar_{running_tar_loss / ite_num4val}_valloss_{val_loss}.pth"
         # torch.save(net.state_dict(), cur_save_model_full_path)
         torch.save({
             'epoch': epoch,
