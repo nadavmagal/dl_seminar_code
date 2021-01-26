@@ -70,16 +70,16 @@ writer = SummaryWriter(log_dir)
 
 epoch_num = 100000
 val_portion = 0.2
-batch_size_train = 2
-batch_size_val = 1  # might work only with 1
+batch_size_train = 12
+batch_size_val = 12  # might work only with 1
 train_num = 0
 val_num = 0
 # checkpoint_model_path = None
-checkpoint_model_path = r'/media/nadav/final_project_results/models/2021.01.22-20.24/u2netp_ephoch_60_bce_itr_257542_train_0.6749123306614084_tar_0.07845910467427579_valloss_1971.7270900681615.pth'
+checkpoint_model_path = r'/media/nadav/final_project_results/models/2021.01.24-20.07/u2netp_ephoch_213_bce_itr_74624_train_0.3594102985225618_tar_0.03484907116878524_valloss_0.9901985554691385.pth'
 
 
 # tra_img_name_list = glob.glob(data_dir + tra_image_dir + '*' + image_ext)
-tra_img_name_list = glob.glob(tra_image_dir + '*' + image_ext)[:100]
+tra_img_name_list = glob.glob(tra_image_dir + '*' + image_ext)
 
 tra_lbl_name_list = []
 for img_path in tra_img_name_list:
@@ -195,7 +195,7 @@ for epoch in range(start_epoch, epoch_num):
         # del temporary outputs and loss
         del d0, d1, d2, d3, d4, d5, d6, loss2, loss
 
-        if ite_num % 1000 == 0:
+        if ite_num % 500 == 0:
             print("[epoch: %3d/%3d, batch: %5d/%5d, ite: %d] train loss: %3f, tar: %3f " % (
                 epoch + 1, epoch_num, (i + 1) * batch_size_train, train_num, ite_num, running_loss / ite_num4val,
                 running_tar_loss / ite_num4val))

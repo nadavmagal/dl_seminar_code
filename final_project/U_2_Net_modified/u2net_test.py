@@ -93,7 +93,7 @@ def main():
     # model_dir = os.path.join(os.getcwd(), 'saved_models', model_name, model_name + '.pth')
     # model_dir = r'/media/nadav/final_project_results/models/2021.01.19-19.49/u2net_bce_itr_94000_train_0.300097_tar_0.028924.pth'
     # model_dir = r'../../../final_project_results/models/2021.01.22-12.01/u2netp_ephoch_318_bce_itr_280720_train_0.3595311115919189_tar_0.033946142557331103.pth'
-    model_dir = r'/media/nadav/final_project_results/models/2021.01.22-12.01/u2netp_ephoch_504_bce_itr_444400_train_0.3133861400017684_tar_0.02861546263818375.pth'
+    model_dir = r'/media/nadav/final_project_results/models/2021.01.24-19.53/u2netp_epoch_696_bce_itr_130240_train_0.2965891246260567_tar_0.026760372195646843.pth'
     params_to_save = dict()
     params_to_save['model_path'] = model_dir
     json.dump(params_to_save, open(prediction_dir+'models_params.json','w'))

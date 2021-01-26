@@ -71,12 +71,12 @@ batch_size_train = 12 # default 12
 batch_size_val = 1
 train_num = 0
 val_num = 0
-checkpoint_model_path = None
-# checkpoint_model_path = r'/home/nadav/dl_seminar/final_project_results/models/2021.01.21-18.55/u2netp_ephoch_1_bce_itr_100_train_3.5880941772460937_tar_0.5038655388355255.pth'
+# checkpoint_model_path = None
+checkpoint_model_path = r'/media/nadav/final_project_results/models/2021.01.24-19.53/u2netp_epoch_696_bce_itr_130240_train_0.2965891246260567_tar_0.026760372195646843.pth'
 
 # tra_img_name_list = glob.glob(data_dir + tra_image_dir + '*' + image_ext)
 tra_img_name_list = glob.glob(tra_image_dir + '*' + image_ext)
-# tra_img_name_list = tra_img_name_list[:100]  # TODO: be carful and remove this
+# tra_img_name_list = tra_img_name_list[:100]  # TODO: be careful and remove this
 
 tra_lbl_name_list = []
 for img_path in tra_img_name_list:
@@ -176,13 +176,15 @@ for epoch in range(start_epoch, epoch_num):
         # del temporary outputs and loss
         del d0, d1, d2, d3, d4, d5, d6, loss2, loss
 
-        if ite_num % 1000 == 0:
+        if ite_num % 500 == 0:
             print("[epoch: %3d/%3d, batch: %5d/%5d, ite: %d] train loss: %3f, tar: %3f " % (
                 epoch + 1, epoch_num, (i + 1) * batch_size_train, train_num, ite_num, running_loss / ite_num4val,
                 running_tar_loss / ite_num4val))
 
+    writer.add_scalars('loss_tar', {'train_tar': running_tar_loss / ite_num4val}, epoch + 1)
+    writer.add_scalars('loss', {'train': running_loss / ite_num4val}, epoch + 1)
     if epoch % 3 == 0:
-        cur_save_model_full_path = model_dir + model_name + f"_ephoch_{epoch}_bce_itr_{ite_num}_train_{running_loss / ite_num4val}_tar_{running_tar_loss / ite_num4val}.pth"
+        cur_save_model_full_path = model_dir + model_name + f"_epoch_{epoch}_bce_itr_{ite_num}_train_{running_loss / ite_num4val}_tar_{running_tar_loss / ite_num4val}.pth"
         # torch.save(net.state_dict(), cur_save_model_full_path)
         torch.save({
             'epoch': epoch,
@@ -197,7 +199,4 @@ for epoch in range(start_epoch, epoch_num):
     net.train()  # resume train
     ite_num4val = 0
 
-    writer.add_scalars('loss_tar', {'train_tar': running_tar_loss / ite_num4val}, epoch + 1)
-    writer.add_scalars('loss', {'train': running_loss / ite_num4val}, epoch + 1)
-
-# tensorboard --logdir=<path_to_log>
+# tensorboard --logdir=/media/nadav/final_project_results/logs/
