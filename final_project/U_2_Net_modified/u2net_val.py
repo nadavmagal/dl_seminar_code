@@ -1,22 +1,7 @@
-import os
-from skimage import io, transform
 import torch
 import torchvision
 from torch.autograd import Variable
 import torch.nn as nn
-import torch.nn.functional as F
-from torch.utils.data import Dataset, DataLoader
-from torchvision import transforms  # , utils
-from u2net_test import normPRED
-
-import numpy as np
-from PIL import Image
-import glob
-
-from data_loader import RescaleT
-from data_loader import ToTensor
-from data_loader import ToTensorLab
-from data_loader import SalObjDataset
 
 from model import U2NET  # full size version 173.6 MB
 from model import U2NETP  # small version u2net 4.7 MB

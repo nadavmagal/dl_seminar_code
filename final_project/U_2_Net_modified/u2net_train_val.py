@@ -24,6 +24,12 @@ from u2net_val import validation_epoch
 from model import U2NET
 from model import U2NETP
 
+USE_REFACTOR = True
+if USE_REFACTOR:
+    # todo: understand how the class is immediately imported, and will be imported if looked like this.
+    from model.u2net_refactor import U2NET_lite
+
+
 # ------- 1. define loss function --------
 os.environ["CUDA_VISIBLE_DEVICES"] = "1"
 
@@ -48,11 +54,11 @@ def muti_bce_loss_fusion(d0, d1, d2, d3, d4, d5, d6, labels_v):
 
 # ------- 2. set the directory of training dataset --------
 
-model_name = 'u2netp'
+model_name = 'u2net'
 
 data_dir = os.path.join(os.getcwd(), 'train_data' + os.sep)
-tra_image_dir = r'../../../datasets/DUTS-TR/DUTS-TR-Image/'  # os.path.join('DUTS', 'DUTS-TR', 'DUTS-TR', 'im_aug' + os.sep)
-tra_label_dir = r'../../../datasets/DUTS-TR/DUTS-TR-Mask/'  # os.path.join('DUTS', 'DUTS-TR', 'DUTS-TR', 'gt_aug' + os.sep)
+tra_image_dir = r'../../../datasets/DUTS_sample/DUTS-TR-Image/'  # os.path.join('DUTS', 'DUTS-TR', 'DUTS-TR', 'im_aug' + os.sep)
+tra_label_dir = r'../../../datasets/DUTS_sample/DUTS-TR-Mask/'  # os.path.join('DUTS', 'DUTS-TR', 'DUTS-TR', 'gt_aug' + os.sep)
 
 image_ext = '.jpg'
 label_ext = '.png'
@@ -74,8 +80,8 @@ batch_size_train = 12
 batch_size_val = 12  # might work only with 1
 train_num = 0
 val_num = 0
-# checkpoint_model_path = None
-checkpoint_model_path = r'/media/nadav/final_project_results/models/2021.01.24-20.07/u2netp_ephoch_213_bce_itr_74624_train_0.3594102985225618_tar_0.03484907116878524_valloss_0.9901985554691385.pth'
+checkpoint_model_path = None
+# checkpoint_model_path = r'/media/nadav/final_project_results/models/2021.01.24-20.07/u2netp_ephoch_213_bce_itr_74624_train_0.3594102985225618_tar_0.03484907116878524_valloss_0.9901985554691385.pth'
 
 
 # tra_img_name_list = glob.glob(data_dir + tra_image_dir + '*' + image_ext)
@@ -129,7 +135,10 @@ salobj_val_dataloader = DataLoader(salobj_val_dataset, batch_size=batch_size_val
 # ------- 3. define model --------
 # define the net
 if (model_name == 'u2net'):
-    net = U2NET(3, 1)
+    if USE_REFACTOR:
+        net = U2NET_lite()
+    else:
+        net = U2NET(3, 1)
 elif (model_name == 'u2netp'):
     net = U2NETP(3, 1)
 
