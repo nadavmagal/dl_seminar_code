@@ -24,11 +24,6 @@ from u2net_val import validation_epoch
 from model import U2NET
 from model import U2NETP
 
-USE_REFACTOR = True
-if USE_REFACTOR:
-    # todo: understand how the class is immediately imported, and will be imported if looked like this.
-    from model.u2net_refactor import U2NET_lite
-
 
 # ------- 1. define loss function --------
 os.environ["CUDA_VISIBLE_DEVICES"] = "1"
@@ -135,10 +130,7 @@ salobj_val_dataloader = DataLoader(salobj_val_dataset, batch_size=batch_size_val
 # ------- 3. define model --------
 # define the net
 if (model_name == 'u2net'):
-    if USE_REFACTOR:
-        net = U2NET_lite()
-    else:
-        net = U2NET(3, 1)
+    net = U2NET(3, 1)
 elif (model_name == 'u2netp'):
     net = U2NETP(3, 1)
 
