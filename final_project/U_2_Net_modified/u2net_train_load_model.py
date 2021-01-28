@@ -71,12 +71,12 @@ os.makedirs(log_dir, exist_ok=True)
 writer = SummaryWriter(log_dir)
 
 epoch_num = 100000
-batch_size_train = 1  # default 12
+batch_size_train = 12 # default 12
 batch_size_val = 1
 train_num = 0
 val_num = 0
-checkpoint_model_path = None
-# checkpoint_model_path = r'/media/nadav/final_project_results/models/2021.01.24-19.53/u2netp_epoch_696_bce_itr_130240_train_0.2965891246260567_tar_0.026760372195646843.pth'
+# checkpoint_model_path = None
+checkpoint_model_path = r'/media/nadav/final_project_results/models/2021.01.25-20.47/u2netp_epoch_912_bce_itr_190960_train_0.27281275450844655_tar_0.024022218178619038.pth'
 
 # tra_img_name_list = glob.glob(data_dir + tra_image_dir + '*' + image_ext)
 tra_img_name_list = glob.glob(tra_image_dir + '*' + image_ext)
@@ -186,7 +186,7 @@ for epoch in range(start_epoch, epoch_num):
         # del temporary outputs and loss
         del d0, d1, d2, d3, d4, d5, d6, loss2, loss
 
-        if ite_num % 1 == 0:
+        if ite_num % 500 == 0:
             print("[epoch: %3d/%3d, batch: %5d/%5d, ite: %d] train loss: %3f, tar: %3f " % (
                 epoch + 1, epoch_num, (i + 1) * batch_size_train, train_num, ite_num, running_loss / ite_num4val,
                 running_tar_loss / ite_num4val))
