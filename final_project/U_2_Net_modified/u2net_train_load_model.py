@@ -22,7 +22,7 @@ from data_loader import SalObjDataset
 
 from model import U2NET
 from model import U2NETP
-from model import UNNETP
+from model import U3NETP
 
 # ------- 1. define loss function --------
 # os.environ["CUDA_VISIBLE_DEVICES"] = "1"
@@ -49,7 +49,9 @@ def muti_bce_loss_fusion(d0, d1, d2, d3, d4, d5, d6, labels_v):
 
 # model_name = 'u2net'  # 'u2netp'
 # model_name = 'u2netp'
-model_name = 'unnetp'
+# model_name = 'un2etp_dyn'
+model_name = 'u3netp'
+# model_name = 'unnetp'
 
 data_dir = os.path.join(os.getcwd(), 'train_data' + os.sep)
 tra_image_dir = r'../../../datasets/DUTS-TR/DUTS-TR-Image/'  # os.path.join('DUTS', 'DUTS-TR', 'DUTS-TR', 'im_aug' + os.sep)
@@ -115,8 +117,12 @@ if (model_name == 'u2net'):
     net = U2NET(3, 1)
 elif (model_name == 'u2netp'):
     net = U2NETP(3, 1)
+elif (model_name == 'un2etp_dyn'):
+    net = U2NETPDyn(3, 1)
+elif (model_name == 'u3netp'):
+    net = U3NETP(3,1)
 elif (model_name == 'unnetp'):
-    net = UNNETP(3, 1)
+    net = create_unnet(2)
 
 if torch.cuda.is_available():
     net.cuda()

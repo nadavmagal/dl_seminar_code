@@ -351,11 +351,11 @@ def create_model_layers(layers_dict, in_ch, out_ch, power):
     layers_dict['d_2__outconv'] = nn.Conv2d(6, out_ch, 1)
 
 
-### U^n-Net small ###
-class UNNETP(nn.Module):
+### U^2-Net dynamic small ###
+class U2NETPDyn(nn.Module):
 
     def __init__(self, in_ch=3, out_ch=1, power=2):
-        super(UNNETP, self).__init__()
+        super(U2NETPDyn, self).__init__()
         self.layers_dict = OrderedDict()
 
         create_model_layers(self.layers_dict, in_ch=3, out_ch=1, power=2)
@@ -400,7 +400,8 @@ class UNNETP(nn.Module):
                 save_output_dict[cur_output_layer_key] = eval(f'self.{cur_layer_key}')(
                     save_output_dict[cur_input_layer_key])
                 if int(cur_layer_key.split('_N')[1]) > 1:
-                    save_output_dict[cur_output_layer_key] = _upsample_like(save_output_dict[cur_output_layer_key], save_output_dict[prev_output_layer_key])
+                    save_output_dict[cur_output_layer_key] = _upsample_like(save_output_dict[cur_output_layer_key],
+                                                                            save_output_dict[prev_output_layer_key])
 
         d1 = save_output_dict['d1']
         d2 = save_output_dict['d2']
@@ -412,3 +413,4 @@ class UNNETP(nn.Module):
         d0 = self.d_2__outconv(torch.cat((d1, d2, d3, d4, d5, d6), 1))
 
         return F.sigmoid(d0), F.sigmoid(d1), F.sigmoid(d2), F.sigmoid(d3), F.sigmoid(d4), F.sigmoid(d5), F.sigmoid(d6)
+
