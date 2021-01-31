@@ -62,7 +62,7 @@ label_ext = '.png'
 
 # model_dir = os.path.join(os.getcwd(), 'saved_models', model_name + os.sep)
 cur_date_time = time.strftime("%Y.%m.%d-%H.%M")
-model_dir = os.path.join(r'../../../final_project_results/models/', cur_date_time) + os.sep
+model_dir = os.path.join(f'../../../final_project_results/models_{model_name}/', cur_date_time) + os.sep
 log_dir = os.path.join(r'../../../final_project_results/logs/', cur_date_time) + os.sep
 os.makedirs(model_dir, exist_ok=True)
 os.makedirs(log_dir, exist_ok=True)
@@ -71,12 +71,12 @@ os.makedirs(log_dir, exist_ok=True)
 writer = SummaryWriter(log_dir)
 
 epoch_num = 100000
-batch_size_train = 12 # default 12
+batch_size_train = 6 # default 12
 batch_size_val = 1
 train_num = 0
 val_num = 0
-# checkpoint_model_path = None
-checkpoint_model_path = r'/media/nadav/final_project_results/models/2021.01.25-20.47/u2netp_epoch_912_bce_itr_190960_train_0.27281275450844655_tar_0.024022218178619038.pth'
+checkpoint_model_path = None
+# checkpoint_model_path = r'/media/nadav/final_project_results/models/2021.01.25-20.47/u2netp_epoch_912_bce_itr_190960_train_0.27281275450844655_tar_0.024022218178619038.pth'
 
 # tra_img_name_list = glob.glob(data_dir + tra_image_dir + '*' + image_ext)
 tra_img_name_list = glob.glob(tra_image_dir + '*' + image_ext)
