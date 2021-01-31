@@ -23,7 +23,7 @@ from u2net_val import validation_epoch
 
 from model import U2NET
 from model import U2NETP
-
+from model import U3NETP
 
 # ------- 1. define loss function --------
 os.environ["CUDA_VISIBLE_DEVICES"] = "1"
@@ -49,18 +49,19 @@ def muti_bce_loss_fusion(d0, d1, d2, d3, d4, d5, d6, labels_v):
 
 # ------- 2. set the directory of training dataset --------
 
-model_name = 'u2net'
+# model_name = 'u2netp'
+model_name = 'u3netp'
 
 data_dir = os.path.join(os.getcwd(), 'train_data' + os.sep)
-tra_image_dir = r'../../../datasets/DUTS_sample/DUTS-TR-Image/'  # os.path.join('DUTS', 'DUTS-TR', 'DUTS-TR', 'im_aug' + os.sep)
-tra_label_dir = r'../../../datasets/DUTS_sample/DUTS-TR-Mask/'  # os.path.join('DUTS', 'DUTS-TR', 'DUTS-TR', 'gt_aug' + os.sep)
+tra_image_dir = r'../../../datasets/DUTS-TR/DUTS-TR-Image/'  # os.path.join('DUTS', 'DUTS-TR', 'DUTS-TR', 'im_aug' + os.sep)
+tra_label_dir = r'../../../datasets/DUTS-TR/DUTS-TR-Mask/'  # os.path.join('DUTS', 'DUTS-TR', 'DUTS-TR', 'gt_aug' + os.sep)
 
 image_ext = '.jpg'
 label_ext = '.png'
 
 # model_dir = os.path.join(os.getcwd(), 'saved_models', model_name + os.sep)
 cur_date_time = time.strftime("%Y.%m.%d-%H.%M")
-model_dir = os.path.join(r'../../../final_project_results/models/', cur_date_time) + os.sep
+model_dir = os.path.join(f'../../../final_project_results/models_{model_name}/', 'val_'+cur_date_time) + os.sep
 log_dir = os.path.join(r'../../../final_project_results/logs/', cur_date_time) + os.sep
 
 os.makedirs(model_dir, exist_ok=True)
@@ -71,12 +72,12 @@ writer = SummaryWriter(log_dir)
 
 epoch_num = 100000
 val_portion = 0.2
-batch_size_train = 12
-batch_size_val = 12  # might work only with 1
+batch_size_train = 6
+batch_size_val = 6  # might work only with 1
 train_num = 0
 val_num = 0
-checkpoint_model_path = None
-# checkpoint_model_path = r'/media/nadav/final_project_results/models/2021.01.24-20.07/u2netp_ephoch_213_bce_itr_74624_train_0.3594102985225618_tar_0.03484907116878524_valloss_0.9901985554691385.pth'
+# checkpoint_model_path = None
+checkpoint_model_path = r'/media/nadav/final_project_results/models_u3netp/val_2021.01.28-20.48/u3netp_ephoch_42_bce_itr_60544_train_0.8777669558132236_tar_0.10679248850316402_valloss_1.0554208256240585.pth'
 
 
 # tra_img_name_list = glob.glob(data_dir + tra_image_dir + '*' + image_ext)
@@ -133,6 +134,8 @@ if (model_name == 'u2net'):
     net = U2NET(3, 1)
 elif (model_name == 'u2netp'):
     net = U2NETP(3, 1)
+elif (model_name == 'u3netp'):
+    net = U3NETP(3,1)
 
 if torch.cuda.is_available():
     net.cuda()
@@ -196,7 +199,7 @@ for epoch in range(start_epoch, epoch_num):
         # del temporary outputs and loss
         del d0, d1, d2, d3, d4, d5, d6, loss2, loss
 
-        if ite_num % 500 == 0:
+        if ite_num % 20 == 0:
             print("[epoch: %3d/%3d, batch: %5d/%5d, ite: %d] train loss: %3f, tar: %3f " % (
                 epoch + 1, epoch_num, (i + 1) * batch_size_train, train_num, ite_num, running_loss / ite_num4val,
                 running_tar_loss / ite_num4val))

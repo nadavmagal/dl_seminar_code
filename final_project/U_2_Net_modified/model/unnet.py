@@ -2,6 +2,7 @@ import torch
 import torch.nn as nn
 from torchvision import models
 import torch.nn.functional as F
+from collections import OrderedDict
 
 
 class REBNCONV(nn.Module):
@@ -313,318 +314,103 @@ class RSU4F(nn.Module):  # UNet04FRES(nn.Module):
         return hx1d + hxin
 
 
-##### U^2-Net ####
-class U2NET(nn.Module):
+def create_model_layers(layers_dict, in_ch, out_ch, power):
+    # if power == 1:  # end condition
+    layers_dict['d_1__EN_stage_N1'] = RSU7(in_ch, 16, 64)
+    layers_dict['d_1__EN_pool_N12'] = nn.MaxPool2d(2, stride=2, ceil_mode=True)
 
-    def __init__(self, in_ch=3, out_ch=1):
-        super(U2NET, self).__init__()
+    layers_dict['d_1__EN_stage_N2'] = RSU6(64, 16, 64)
+    layers_dict['d_1__EN_pool_N23'] = nn.MaxPool2d(2, stride=2, ceil_mode=True)
 
-        self.stage1 = RSU7(in_ch, 32, 64)
-        self.pool12 = nn.MaxPool2d(2, stride=2, ceil_mode=True)
+    layers_dict['d_1__EN_stage_N3'] = RSU5(64, 16, 64)
+    layers_dict['d_1__EN_pool_N34'] = nn.MaxPool2d(2, stride=2, ceil_mode=True)
 
-        self.stage2 = RSU6(64, 32, 128)
-        self.pool23 = nn.MaxPool2d(2, stride=2, ceil_mode=True)
+    layers_dict['d_1__EN_stage_N4'] = RSU4(64, 16, 64)
+    layers_dict['d_1__EN_pool_N45'] = nn.MaxPool2d(2, stride=2, ceil_mode=True)
 
-        self.stage3 = RSU5(128, 64, 256)
-        self.pool34 = nn.MaxPool2d(2, stride=2, ceil_mode=True)
+    layers_dict['d_1__EN_stage_N5'] = RSU4F(64, 16, 64)
+    layers_dict['d_1__EN_pool_N56'] = nn.MaxPool2d(2, stride=2, ceil_mode=True)
 
-        self.stage4 = RSU4(256, 128, 512)
-        self.pool45 = nn.MaxPool2d(2, stride=2, ceil_mode=True)
+    layers_dict['d_1__bottom_stage_N6'] = RSU4F(64, 16, 64)
+    # decoder
+    layers_dict['d_1__DE_stage_N5'] = RSU4F(128, 16, 64)
+    layers_dict['d_1__DE_stage_N4'] = RSU4(128, 16, 64)
+    layers_dict['d_1__DE_stage_N3'] = RSU5(128, 16, 64)
+    layers_dict['d_1__DE_stage_N2'] = RSU6(128, 16, 64)
+    layers_dict['d_1__DE_stage_N1'] = RSU7(128, 16, 64)
+    # return layers_dict
 
-        self.stage5 = RSU4F(512, 256, 512)
-        self.pool56 = nn.MaxPool2d(2, stride=2, ceil_mode=True)
+    # else not at the end
+    layers_dict['d_2__side_N1'] = nn.Conv2d(64, out_ch, 3, padding=1)
+    layers_dict['d_2__side_N2'] = nn.Conv2d(64, out_ch, 3, padding=1)
+    layers_dict['d_2__side_N3'] = nn.Conv2d(64, out_ch, 3, padding=1)
+    layers_dict['d_2__side_N4'] = nn.Conv2d(64, out_ch, 3, padding=1)
+    layers_dict['d_2__side_N5'] = nn.Conv2d(64, out_ch, 3, padding=1)
+    layers_dict['d_2__side_N6'] = nn.Conv2d(64, out_ch, 3, padding=1)
 
-        self.stage6 = RSU4F(512, 256, 512)
-
-        # decoder
-        self.stage5d = RSU4F(1024, 256, 512)
-        self.stage4d = RSU4(1024, 128, 256)
-        self.stage3d = RSU5(512, 64, 128)
-        self.stage2d = RSU6(256, 32, 64)
-        self.stage1d = RSU7(128, 16, 64)
-
-        self.side1 = nn.Conv2d(64, out_ch, 3, padding=1)
-        self.side2 = nn.Conv2d(64, out_ch, 3, padding=1)
-        self.side3 = nn.Conv2d(128, out_ch, 3, padding=1)
-        self.side4 = nn.Conv2d(256, out_ch, 3, padding=1)
-        self.side5 = nn.Conv2d(512, out_ch, 3, padding=1)
-        self.side6 = nn.Conv2d(512, out_ch, 3, padding=1)
-
-        self.outconv = nn.Conv2d(6, out_ch, 1)
-
-    def forward(self, x):
-        hx = x
-
-        # stage 1
-        hx1 = self.stage1(hx)
-        hx = self.pool12(hx1)
-
-        # stage 2
-        hx2 = self.stage2(hx)
-        hx = self.pool23(hx2)
-
-        # stage 3
-        hx3 = self.stage3(hx)
-        hx = self.pool34(hx3)
-
-        # stage 4
-        hx4 = self.stage4(hx)
-        hx = self.pool45(hx4)
-
-        # stage 5
-        hx5 = self.stage5(hx)
-        hx = self.pool56(hx5)
-
-        # stage 6
-        hx6 = self.stage6(hx)
-        hx6up = _upsample_like(hx6, hx5)
-
-        # -------------------- decoder --------------------
-        hx5d = self.stage5d(torch.cat((hx6up, hx5), 1))
-        hx5dup = _upsample_like(hx5d, hx4)
-
-        hx4d = self.stage4d(torch.cat((hx5dup, hx4), 1))
-        hx4dup = _upsample_like(hx4d, hx3)
-
-        hx3d = self.stage3d(torch.cat((hx4dup, hx3), 1))
-        hx3dup = _upsample_like(hx3d, hx2)
-
-        hx2d = self.stage2d(torch.cat((hx3dup, hx2), 1))
-        hx2dup = _upsample_like(hx2d, hx1)
-
-        hx1d = self.stage1d(torch.cat((hx2dup, hx1), 1))
-
-        # side output
-        d1 = self.side1(hx1d)
-
-        d2 = self.side2(hx2d)
-        d2 = _upsample_like(d2, d1)
-
-        d3 = self.side3(hx3d)
-        d3 = _upsample_like(d3, d1)
-
-        d4 = self.side4(hx4d)
-        d4 = _upsample_like(d4, d1)
-
-        d5 = self.side5(hx5d)
-        d5 = _upsample_like(d5, d1)
-
-        d6 = self.side6(hx6)
-        d6 = _upsample_like(d6, d1)
-
-        d0 = self.outconv(torch.cat((d1, d2, d3, d4, d5, d6), 1))
-
-        return F.sigmoid(d0), F.sigmoid(d1), F.sigmoid(d2), F.sigmoid(d3), F.sigmoid(d4), F.sigmoid(d5), F.sigmoid(d6)
+    layers_dict['d_2__outconv'] = nn.Conv2d(6, out_ch, 1)
 
 
-### U^2-Net small ###
-class U2NETP(nn.Module):
+### U^2-Net dynamic small ###
+class U2NETPDyn(nn.Module):
 
-    def __init__(self, in_ch=3, out_ch=1):
-        super(U2NETP, self).__init__()
+    def __init__(self, in_ch=3, out_ch=1, power=2):
+        super(U2NETPDyn, self).__init__()
+        self.layers_dict = OrderedDict()
 
-        self.stage1 = RSU7(in_ch, 16, 64)
-        self.pool12 = nn.MaxPool2d(2, stride=2, ceil_mode=True)
-
-        self.stage2 = RSU6(64, 16, 64)
-        self.pool23 = nn.MaxPool2d(2, stride=2, ceil_mode=True)
-
-        self.stage3 = RSU5(64, 16, 64)
-        self.pool34 = nn.MaxPool2d(2, stride=2, ceil_mode=True)
-
-        self.stage4 = RSU4(64, 16, 64)
-        self.pool45 = nn.MaxPool2d(2, stride=2, ceil_mode=True)
-
-        self.stage5 = RSU4F(64, 16, 64)
-        self.pool56 = nn.MaxPool2d(2, stride=2, ceil_mode=True)
-
-        self.stage6 = RSU4F(64, 16, 64)
-
-        # decoder
-        self.stage5d = RSU4F(128, 16, 64)
-        self.stage4d = RSU4(128, 16, 64)
-        self.stage3d = RSU5(128, 16, 64)
-        self.stage2d = RSU6(128, 16, 64)
-        self.stage1d = RSU7(128, 16, 64)
-
-        self.side1 = nn.Conv2d(64, out_ch, 3, padding=1)
-        self.side2 = nn.Conv2d(64, out_ch, 3, padding=1)
-        self.side3 = nn.Conv2d(64, out_ch, 3, padding=1)
-        self.side4 = nn.Conv2d(64, out_ch, 3, padding=1)
-        self.side5 = nn.Conv2d(64, out_ch, 3, padding=1)
-        self.side6 = nn.Conv2d(64, out_ch, 3, padding=1)
-
-        self.outconv = nn.Conv2d(6, out_ch, 1)
+        create_model_layers(self.layers_dict, in_ch=3, out_ch=1, power=2)
+        for cur_layer_key in self.layers_dict:
+            exec(f'self.{cur_layer_key} = self.layers_dict[cur_layer_key]')
 
     def forward(self, x):
         hx = x
+        save_output_dict = dict()
+        for cur_layer_key in self.layers_dict:
+            # print(cur_layer_key)
+            if 'EN_stage' in cur_layer_key:
+                cur_output_key = 'hx' + cur_layer_key.split('_N')[1]
+                # print('output_' + cur_output_key)
+                exec(f'save_output_dict[cur_output_key] = self.{cur_layer_key}(hx)')
+            if 'EN_pool' in cur_layer_key:
+                cur_input_key = 'hx' + cur_layer_key.split('_N')[1][0]
+                # print('input_' + cur_input_key)
+                hx = eval(f'self.{cur_layer_key}')(save_output_dict[cur_input_key])
 
-        # stage 1
-        hx1 = self.stage1(hx)
-        hx = self.pool12(hx1)
+            if 'bottom' in cur_layer_key:
+                cur_output_key = 'hx' + cur_layer_key.split('_N')[1] + 'd'
+                # print('output_' + cur_output_key)
+                exec(f'save_output_dict[cur_output_key] = self.{cur_layer_key}(hx)')
 
-        # stage 2
-        hx2 = self.stage2(hx)
-        hx = self.pool23(hx2)
+            if 'DE_stage' in cur_layer_key:
+                prev_input_layer_key = 'hx' + str(int(cur_layer_key.split('_N')[1]) + 1) + 'd'
+                cur_input_layer_key = 'hx' + cur_layer_key.split('_N')[1]
+                cur_upsampled_layer_key = 'hx' + str(int(cur_layer_key.split('_N')[1]) + 1) + 'up'
+                save_output_dict[cur_upsampled_layer_key] = _upsample_like(save_output_dict[prev_input_layer_key],
+                                                                           save_output_dict[cur_input_layer_key])
+                cur_output_layer_key = 'hx' + str(cur_layer_key.split('_N')[1]) + 'd'
+                save_output_dict[cur_output_layer_key] = eval(f'self.{cur_layer_key}')(
+                    torch.cat((save_output_dict[cur_upsampled_layer_key], save_output_dict[cur_input_layer_key]), 1))
 
-        # stage 3
-        hx3 = self.stage3(hx)
-        hx = self.pool34(hx3)
+                # print(save_output_dict[cur_output_layer_key].shape)
 
-        # stage 4
-        hx4 = self.stage4(hx)
-        hx = self.pool45(hx4)
+            if 'side' in cur_layer_key:
+                cur_input_layer_key = 'hx' + cur_layer_key.split('_N')[1] + 'd'
+                cur_output_layer_key = 'd' + cur_layer_key.split('_N')[1]
+                prev_output_layer_key = 'd' + str(int(cur_layer_key.split('_N')[1]) - 1)
+                save_output_dict[cur_output_layer_key] = eval(f'self.{cur_layer_key}')(
+                    save_output_dict[cur_input_layer_key])
+                if int(cur_layer_key.split('_N')[1]) > 1:
+                    save_output_dict[cur_output_layer_key] = _upsample_like(save_output_dict[cur_output_layer_key],
+                                                                            save_output_dict[prev_output_layer_key])
 
-        # stage 5
-        hx5 = self.stage5(hx)
-        hx = self.pool56(hx5)
+        d1 = save_output_dict['d1']
+        d2 = save_output_dict['d2']
+        d3 = save_output_dict['d3']
+        d4 = save_output_dict['d4']
+        d5 = save_output_dict['d5']
+        d6 = save_output_dict['d6']
 
-        # stage 6
-        hx6 = self.stage6(hx)
-        hx6up = _upsample_like(hx6, hx5)
-
-        # decoder
-        hx5d = self.stage5d(torch.cat((hx6up, hx5), 1))
-        hx5dup = _upsample_like(hx5d, hx4)
-
-        hx4d = self.stage4d(torch.cat((hx5dup, hx4), 1))
-        hx4dup = _upsample_like(hx4d, hx3)
-
-        hx3d = self.stage3d(torch.cat((hx4dup, hx3), 1))
-        hx3dup = _upsample_like(hx3d, hx2)
-
-        hx2d = self.stage2d(torch.cat((hx3dup, hx2), 1))
-        hx2dup = _upsample_like(hx2d, hx1)
-
-        hx1d = self.stage1d(torch.cat((hx2dup, hx1), 1))
-
-        # side output
-        d1 = self.side1(hx1d)
-
-        d2 = self.side2(hx2d)
-        d2 = _upsample_like(d2, d1)
-
-        d3 = self.side3(hx3d)
-        d3 = _upsample_like(d3, d1)
-
-        d4 = self.side4(hx4d)
-        d4 = _upsample_like(d4, d1)
-
-        d5 = self.side5(hx5d)
-        d5 = _upsample_like(d5, d1)
-
-        d6 = self.side6(hx6)
-        d6 = _upsample_like(d6, d1)
-
-        d0 = self.outconv(torch.cat((d1, d2, d3, d4, d5, d6), 1))
+        d0 = self.d_2__outconv(torch.cat((d1, d2, d3, d4, d5, d6), 1))
 
         return F.sigmoid(d0), F.sigmoid(d1), F.sigmoid(d2), F.sigmoid(d3), F.sigmoid(d4), F.sigmoid(d5), F.sigmoid(d6)
 
-
-### U^n-Net small ###
-class UnNETP(nn.Module):
-
-    def __init__(self, in_ch=3, out_ch=1, n=2):
-        super(UnNETP, self).__init__()
-
-        for cur_power in range(n - 1):
-            if cur_power == 1:
-                cur_net = U2NETP(3, 1)
-
-        self.stage1 = RSU7(in_ch, 16, 64)
-        self.pool12 = nn.MaxPool2d(2, stride=2, ceil_mode=True)
-
-        self.stage2 = RSU6(64, 16, 64)
-        self.pool23 = nn.MaxPool2d(2, stride=2, ceil_mode=True)
-
-        self.stage3 = RSU5(64, 16, 64)
-        self.pool34 = nn.MaxPool2d(2, stride=2, ceil_mode=True)
-
-        self.stage4 = RSU4(64, 16, 64)
-        self.pool45 = nn.MaxPool2d(2, stride=2, ceil_mode=True)
-
-        self.stage5 = RSU4F(64, 16, 64)
-        self.pool56 = nn.MaxPool2d(2, stride=2, ceil_mode=True)
-
-        self.stage6 = RSU4F(64, 16, 64)
-
-        # decoder
-        self.stage5d = RSU4F(128, 16, 64)
-        self.stage4d = RSU4(128, 16, 64)
-        self.stage3d = RSU5(128, 16, 64)
-        self.stage2d = RSU6(128, 16, 64)
-        self.stage1d = RSU7(128, 16, 64)
-
-        self.side1 = nn.Conv2d(64, out_ch, 3, padding=1)
-        self.side2 = nn.Conv2d(64, out_ch, 3, padding=1)
-        self.side3 = nn.Conv2d(64, out_ch, 3, padding=1)
-        self.side4 = nn.Conv2d(64, out_ch, 3, padding=1)
-        self.side5 = nn.Conv2d(64, out_ch, 3, padding=1)
-        self.side6 = nn.Conv2d(64, out_ch, 3, padding=1)
-
-        self.outconv = nn.Conv2d(6, out_ch, 1)
-
-    def forward(self, x):
-
-        hx = x
-
-        # stage 1
-        hx1 = self.stage1(hx)
-        hx = self.pool12(hx1)
-
-        # stage 2
-        hx2 = self.stage2(hx)
-        hx = self.pool23(hx2)
-
-        # stage 3
-        hx3 = self.stage3(hx)
-        hx = self.pool34(hx3)
-
-        # stage 4
-        hx4 = self.stage4(hx)
-        hx = self.pool45(hx4)
-
-        # stage 5
-        hx5 = self.stage5(hx)
-        hx = self.pool56(hx5)
-
-        # stage 6
-        hx6 = self.stage6(hx)
-        hx6up = _upsample_like(hx6, hx5)
-
-        # decoder
-        hx5d = self.stage5d(torch.cat((hx6up, hx5), 1))
-        hx5dup = _upsample_like(hx5d, hx4)
-
-        hx4d = self.stage4d(torch.cat((hx5dup, hx4), 1))
-        hx4dup = _upsample_like(hx4d, hx3)
-
-        hx3d = self.stage3d(torch.cat((hx4dup, hx3), 1))
-        hx3dup = _upsample_like(hx3d, hx2)
-
-        hx2d = self.stage2d(torch.cat((hx3dup, hx2), 1))
-        hx2dup = _upsample_like(hx2d, hx1)
-
-        hx1d = self.stage1d(torch.cat((hx2dup, hx1), 1))
-
-        # side output
-        d1 = self.side1(hx1d)
-
-        d2 = self.side2(hx2d)
-        d2 = _upsample_like(d2, d1)
-
-        d3 = self.side3(hx3d)
-        d3 = _upsample_like(d3, d1)
-
-        d4 = self.side4(hx4d)
-        d4 = _upsample_like(d4, d1)
-
-        d5 = self.side5(hx5d)
-        d5 = _upsample_like(d5, d1)
-
-        d6 = self.side6(hx6)
-        d6 = _upsample_like(d6, d1)
-
-        d0 = self.outconv(torch.cat((d1, d2, d3, d4, d5, d6), 1))
-
-        return F.sigmoid(d0), F.sigmoid(d1), F.sigmoid(d2), F.sigmoid(d3), F.sigmoid(d4), F.sigmoid(d5), F.sigmoid(d6)
