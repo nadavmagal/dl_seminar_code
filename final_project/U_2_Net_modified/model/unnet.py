@@ -414,3 +414,119 @@ class U2NETPDyn(nn.Module):
 
         return F.sigmoid(d0), F.sigmoid(d1), F.sigmoid(d2), F.sigmoid(d3), F.sigmoid(d4), F.sigmoid(d5), F.sigmoid(d6)
 
+
+''' Unnet with class '''
+
+''' Unnet with class '''
+
+
+### U^x-Net small ###
+class UxNETP(nn.Module):
+
+    def __init__(self, in_ch=3, out_ch=1, unet_inner_encoder_layer_list=[], unet_inner_bottom_layer_list=[],
+                 unet_inner_decoder_layer_list=[], ):
+        super(UxNETP, self).__init__()
+        self.net_depth = len(unet_inner_encoder_layer_list)
+        self.encoder_layers_name_list = []
+        self.encoder_pooling_layers_name_list = []
+        self.bottom_layers_name_list = []
+        self.decoder_layers_name_list = []
+
+        for ii, cur_layer in enumerate(unet_inner_encoder_layer_list):
+            exec(f'self.stage{ii + 1} = cur_layer')
+            exec(f'self.pool{ii + 1}{ii + 2} = nn.MaxPool2d(2, stride=2, ceil_mode=True)')
+            self.encoder_layers_name_list.append(f'stage{ii + 1}')
+            self.encoder_pooling_layers_name_list.append(f'pool{ii + 1}{ii + 2}')
+
+        exec(f'self.stage6 = unet_inner_bottom_layer_list[0]')
+        self.bottom_layers_name_list.append(f'stage{ii+2}')
+
+        for ii, cur_layer in zip(sorted(list(range(self.net_depth)), reverse=True), unet_inner_decoder_layer_list):
+            exec(f'self.stage{ii + 1}d = cur_layer')
+            self.decoder_layers_name_list.append(f'stage{ii + 1}d')
+
+    def forward(self, x):
+        hx = x
+        save_output_dict = dict()
+
+        for ii, (cur_enc_layer_name, cur_enc_pool_layer_name) in enumerate(zip(self.encoder_layers_name_list, self.encoder_pooling_layers_name_list)):
+            print(ii)
+            cur_output_key = 'hx' + str(ii+1)
+            print(cur_enc_layer_name)
+            save_output_dict[cur_output_key] = eval(f'self.{cur_enc_layer_name}(hx)')
+            print(cur_enc_pool_layer_name)
+            hx = eval(f'self.{cur_enc_pool_layer_name}(save_output_dict[cur_output_key])')
+
+        for cur_bottom_layer_name in self.bottom_layers_name_list:
+            print(cur_bottom_layer_name)
+            cur_output_key = 'hx' + str(ii+2) + 'd'
+            save_output_dict[cur_output_key] = eval(f'self.{cur_enc_layer_name}(hx)')
+
+        for ii, cur_dec_layer_name in zip(sorted(list(range(self.net_depth)), reverse=True), self.decoder_layers_name_list):
+            prev_layer_name = 'hx' + str(ii+2) + 'd'
+            prev_layer_up_sample_name = 'hx' + str(ii+2)+'up'
+            cur_layer_input_name = 'hx' + str(ii+1)
+            cur_layer_output_name = 'hx' + str(ii+1) + 'd'
+
+            print(prev_layer_up_sample_name)
+            save_output_dict[prev_layer_up_sample_name]= _upsample_like(save_output_dict[prev_layer_name], save_output_dict[cur_layer_input_name])
+            save_output_dict[cur_layer_output_name] = eval(f'self.{cur_dec_layer_name}')(
+                    torch.cat((save_output_dict[prev_layer_up_sample_name], save_output_dict[cur_layer_input_name]), 1))
+
+        return save_output_dict[cur_layer_output_name] + save_output_dict[cur_layer_output_name[:-1]]
+
+def create_single_unnet(unet_inner_encoder_layer_list, unet_inner_bottom_layer_list, unet_inner_decoder_layer_list):
+    unet_depth = len(unet_inner_encoder_layer_list)
+
+    # create inside unet nodes
+    cur_unet_encoder_layer_list = []
+    cur_unet_bottom_layer_list = []
+
+
+    for ii in range(unet_depth):
+        if ii == 0:
+            cur_node = UxNETP(in_ch=3, out_ch=1,
+                          unet_inner_encoder_layer_list=unet_inner_encoder_layer_list,
+                          unet_inner_bottom_layer_list=unet_inner_bottom_layer_list,
+                          unet_inner_decoder_layer_list=unet_inner_decoder_layer_list)
+        else:
+            cur_node = UxNETP(in_ch=3, out_ch=1,
+                              unet_inner_encoder_layer_list=unet_inner_encoder_layer_list[ii:],
+                              unet_inner_bottom_layer_list=unet_inner_bottom_layer_list,
+                              unet_inner_decoder_layer_list=unet_inner_decoder_layer_list[:-ii])
+        cur_unet_encoder_layer_list.append(cur_node)
+
+    cur_unet_bottom_layer_list.append(cur_unet_encoder_layer_list[-1])
+    cur_unet_decoder_layer_list = cur_unet_encoder_layer_list.copy()
+    cur_unet_decoder_layer_list.reverse()
+
+    return cur_unet_encoder_layer_list, cur_unet_bottom_layer_list, cur_unet_decoder_layer_list
+
+def create_unnet(power=2):
+    in_ch = 3
+    out_ch = 1
+    cur_unet_encoder_layer_list, cur_unet_bottom_layer_list, cur_unet_decoder_layer_list = None, None, None
+    for cur_power in range(2,power):
+        if cur_power == 2:
+            cur_unet_encoder_layer_list = [RSU7(in_ch, 16, 64),
+                                             RSU6(64, 16, 64),
+                                             RSU5(64, 16, 64),
+                                             RSU4(64, 16, 64),
+                                             RSU4F(64, 16, 64)]
+            cur_unet_bottom_layer_list = [RSU4F(64, 16, 64)]
+            cur_unet_decoder_layer_list = [RSU4F(128, 16, 64),
+                                             RSU4(128, 16, 64),
+                                             RSU5(128, 16, 64),
+                                             RSU6(128, 16, 64),
+                                             RSU7(128, 16, out_ch)]
+            cur_unet_encoder_layer_list, cur_unet_bottom_layer_list, cur_unet_decoder_layer_list = create_single_unnet(unet_inner_encoder_layer_list, unet_inner_bottom_layer_list, unet_inner_decoder_layer_list)
+        else:
+            cur_unet_encoder_layer_list, cur_unet_bottom_layer_list, cur_unet_decoder_layer_list = create_single_unnet(
+                cur_unet_encoder_layer_list, cur_unet_bottom_layer_list, cur_unet_decoder_layer_list)
+
+    total_unet = cur_node = UxNETP(in_ch=3, out_ch=1,
+                          unet_inner_encoder_layer_list=cur_unet_encoder_layer_list,
+                          unet_inner_bottom_layer_list=cur_unet_bottom_layer_list,
+                          unet_inner_decoder_layer_list=cur_unet_decoder_layer_list)
+
+    return net1

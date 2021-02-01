@@ -24,6 +24,8 @@ from model import U2NET
 from model import U2NETP
 from model import U3NETP
 
+from model.unnet import create_unnet
+
 # ------- 1. define loss function --------
 # os.environ["CUDA_VISIBLE_DEVICES"] = "1"
 bce_loss = nn.BCELoss(size_average=True)
@@ -50,8 +52,8 @@ def muti_bce_loss_fusion(d0, d1, d2, d3, d4, d5, d6, labels_v):
 # model_name = 'u2net'  # 'u2netp'
 # model_name = 'u2netp'
 # model_name = 'un2etp_dyn'
-model_name = 'u3netp'
-# model_name = 'unnetp'
+# model_name = 'u3netp'
+model_name = 'unnetp'
 
 data_dir = os.path.join(os.getcwd(), 'train_data' + os.sep)
 tra_image_dir = r'../../../datasets/DUTS-TR/DUTS-TR-Image/'  # os.path.join('DUTS', 'DUTS-TR', 'DUTS-TR', 'im_aug' + os.sep)
@@ -122,7 +124,7 @@ elif (model_name == 'un2etp_dyn'):
 elif (model_name == 'u3netp'):
     net = U3NETP(3,1)
 elif (model_name == 'unnetp'):
-    net = create_unnet(2)
+    net = create_unnet(4)
 
 if torch.cuda.is_available():
     net.cuda()
