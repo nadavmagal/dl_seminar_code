@@ -25,6 +25,7 @@ from model import U2NETP
 from model import U3NETP
 
 from model.unnet import create_unnet
+from model.unnet_simple import create_unnet_simple
 
 # ------- 1. define loss function --------
 # os.environ["CUDA_VISIBLE_DEVICES"] = "1"
@@ -54,6 +55,7 @@ def muti_bce_loss_fusion(d0, d1, d2, d3, d4, d5, d6, labels_v):
 # model_name = 'un2etp_dyn'
 # model_name = 'u3netp'
 model_name = 'unnetp'
+# model_name = 'unnetp_simple'
 
 data_dir = os.path.join(os.getcwd(), 'train_data' + os.sep)
 tra_image_dir = r'../../../datasets/DUTS-TR/DUTS-TR-Image/'  # os.path.join('DUTS', 'DUTS-TR', 'DUTS-TR', 'im_aug' + os.sep)
@@ -73,7 +75,7 @@ os.makedirs(log_dir, exist_ok=True)
 writer = SummaryWriter(log_dir)
 
 epoch_num = 100000
-batch_size_train = 6 # default 12
+batch_size_train = 1  # default 12
 batch_size_val = 1
 train_num = 0
 val_num = 0
@@ -82,7 +84,7 @@ checkpoint_model_path = None
 
 # tra_img_name_list = glob.glob(data_dir + tra_image_dir + '*' + image_ext)
 tra_img_name_list = glob.glob(tra_image_dir + '*' + image_ext)
-# tra_img_name_list = tra_img_name_list[:100]  # TODO: be careful and remove this
+tra_img_name_list = tra_img_name_list[:100]  # TODO: be careful and remove this
 
 tra_lbl_name_list = []
 for img_path in tra_img_name_list:
@@ -122,9 +124,11 @@ elif (model_name == 'u2netp'):
 elif (model_name == 'un2etp_dyn'):
     net = U2NETPDyn(3, 1)
 elif (model_name == 'u3netp'):
-    net = U3NETP(3,1)
+    net = U3NETP(3, 1)
 elif (model_name == 'unnetp'):
     net = create_unnet(4)
+elif (model_name == 'unnetp_simple'):
+    net = create_unnet_simple(3)
 
 if torch.cuda.is_available():
     net.cuda()
