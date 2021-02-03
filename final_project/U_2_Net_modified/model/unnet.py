@@ -632,7 +632,7 @@ def create_unnet(power=3):
     out_ch = 1
     cur_unet_encoder_layer_list, cur_unet_bottom_layer_list, cur_unet_decoder_layer_list = None, None, None
     for cur_power in range(2, power):
-        print(f'cur_power: {cur_power}')
+        # print(f'cur_power: {cur_power}')
         if cur_power == 2:
             cur_unet_encoder_layer_list = [RSU7(in_ch, 16, 64),
                                            RSU6(64, 16, 64),

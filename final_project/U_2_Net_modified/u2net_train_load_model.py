@@ -75,7 +75,7 @@ os.makedirs(log_dir, exist_ok=True)
 writer = SummaryWriter(log_dir)
 
 epoch_num = 100000
-batch_size_train = 1  # default 12
+batch_size_train = 12  # default 12
 batch_size_val = 1
 train_num = 0
 val_num = 0
@@ -84,7 +84,7 @@ checkpoint_model_path = None
 
 # tra_img_name_list = glob.glob(data_dir + tra_image_dir + '*' + image_ext)
 tra_img_name_list = glob.glob(tra_image_dir + '*' + image_ext)
-tra_img_name_list = tra_img_name_list[:100]  # TODO: be careful and remove this
+# tra_img_name_list = tra_img_name_list[:100]  # TODO: be careful and remove this
 
 tra_lbl_name_list = []
 for img_path in tra_img_name_list:
