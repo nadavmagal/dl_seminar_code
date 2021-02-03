@@ -126,7 +126,7 @@ elif (model_name == 'un2etp_dyn'):
 elif (model_name == 'u3netp'):
     net = U3NETP(3, 1)
 elif (model_name == 'unnetp'):
-    net = create_unnet(4)
+    net = create_unnet(3)
 elif (model_name == 'unnetp_simple'):
     net = create_unnet_simple(3)
 
