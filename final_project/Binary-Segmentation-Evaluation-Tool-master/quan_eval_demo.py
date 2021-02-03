@@ -9,12 +9,12 @@ from measures import compute_ave_MAE_of_methods
 print("------0. set the data path------")
 
 # >>>>>>> Follows have to be manually configured <<<<<<< #
-data_name = 'TEST-DATA' # this will be drawn on the bottom center of the figures
-data_dir = './test_data/' # set the data directory,
-                          # ground truth and results to-be-evaluated should be in this directory
+data_name = 'TEST-DATA'  # this will be drawn on the bottom center of the figures
+data_dir = './test_data/'  # set the data directory,
+                          #u ground truth and results to-be-evaluated should be in this directory
                           # the figures of PR and F-measure curves will be saved in this directory as well
 gt_dir = 'gt' # set the ground truth folder name
-rs_dirs = ['rs1','rs2'] # set the folder names of different methods
+rs_dirs = ['rs1', 'rs2']  # set the folder names of different methods
                         # 'rs1' contains the result of method1
                         # 'rs2' contains the result of method 2
                         # we suggest to name the folder as the method names because they will be shown in the figures' legend

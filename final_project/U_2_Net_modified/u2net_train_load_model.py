@@ -25,7 +25,7 @@ from model import U2NETP
 from model import U3NETP
 
 # ------- 1. define loss function --------
-# os.environ["CUDA_VISIBLE_DEVICES"] = "1"
+os.environ["CUDA_VISIBLE_DEVICES"] = "1"
 bce_loss = nn.BCELoss(size_average=True)
 
 
@@ -75,8 +75,8 @@ batch_size_train = 6 # default 12
 batch_size_val = 1
 train_num = 0
 val_num = 0
-checkpoint_model_path = None
-# checkpoint_model_path = r'/media/nadav/final_project_results/models/2021.01.25-20.47/u2netp_epoch_912_bce_itr_190960_train_0.27281275450844655_tar_0.024022218178619038.pth'
+# checkpoint_model_path = None
+checkpoint_model_path = r'/media/nadav/final_project_results/models_u3netp/2021.01.31-19.34/u3netp_epoch_162_bce_itr_54529_train_0.4337340295653644_tar_0.040799249740314285.pth'
 
 # tra_img_name_list = glob.glob(data_dir + tra_image_dir + '*' + image_ext)
 tra_img_name_list = glob.glob(tra_image_dir + '*' + image_ext)
