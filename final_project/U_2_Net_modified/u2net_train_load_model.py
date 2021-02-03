@@ -55,7 +55,6 @@ def muti_bce_loss_fusion(d0, d1, d2, d3, d4, d5, d6, labels_v):
 # model_name = 'un2etp_dyn'
 # model_name = 'u3netp'
 model_name = 'unnetp'
-# model_name = 'unnetp_simple'
 
 data_dir = os.path.join(os.getcwd(), 'train_data' + os.sep)
 tra_image_dir = r'../../../datasets/DUTS-TR/DUTS-TR-Image/'  # os.path.join('DUTS', 'DUTS-TR', 'DUTS-TR', 'im_aug' + os.sep)
@@ -127,8 +126,6 @@ elif (model_name == 'u3netp'):
     net = U3NETP(3, 1)
 elif (model_name == 'unnetp'):
     net = create_unnet(3)
-elif (model_name == 'unnetp_simple'):
-    net = create_unnet_simple(3)
 
 if torch.cuda.is_available():
     net.cuda()
