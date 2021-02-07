@@ -54,7 +54,8 @@ def muti_bce_loss_fusion(d0, d1, d2, d3, d4, d5, d6, labels_v):
 # model_name = 'u2netp'
 # model_name = 'un2etp_dyn'
 # model_name = 'u3netp'
-model_name = 'unnetp'
+model_name = 'unnetp_3'
+# model_name = 'unnetp_4'
 
 data_dir = os.path.join(os.getcwd(), 'train_data' + os.sep)
 tra_image_dir = r'../../../datasets/DUTS-TR/DUTS-TR-Image/'  # os.path.join('DUTS', 'DUTS-TR', 'DUTS-TR', 'im_aug' + os.sep)
@@ -74,12 +75,12 @@ os.makedirs(log_dir, exist_ok=True)
 writer = SummaryWriter(log_dir)
 
 epoch_num = 100000
-batch_size_train = 12  # default 12
+batch_size_train = 6  # default 12
 batch_size_val = 1
 train_num = 0
 val_num = 0
-# checkpoint_model_path = None
-checkpoint_model_path = r'/media/nadav/final_project_results/models_u3netp/2021.01.31-19.34/u3netp_epoch_162_bce_itr_54529_train_0.4337340295653644_tar_0.040799249740314285.pth'
+checkpoint_model_path = None
+# checkpoint_model_path = r'/media/nadav/final_project_results/models_u3netp/2021.01.31-19.34/u3netp_epoch_162_bce_itr_54529_train_0.4337340295653644_tar_0.040799249740314285.pth'
 
 # tra_img_name_list = glob.glob(data_dir + tra_image_dir + '*' + image_ext)
 tra_img_name_list = glob.glob(tra_image_dir + '*' + image_ext)
@@ -124,8 +125,12 @@ elif (model_name == 'un2etp_dyn'):
     net = U2NETPDyn(3, 1)
 elif (model_name == 'u3netp'):
     net = U3NETP(3, 1)
-elif (model_name == 'unnetp'):
+elif (model_name == 'unnetp_3'):
     net = create_unnet(3)
+elif (model_name == 'unnetp_4'):
+    net = create_unnet(4)
+
+print(f'number of parameters: {sum(p.numel() for p in net.parameters() if p.requires_grad)}')
 
 if torch.cuda.is_available():
     net.cuda()
@@ -189,7 +194,7 @@ for epoch in range(start_epoch, epoch_num):
         # del temporary outputs and loss
         del d0, d1, d2, d3, d4, d5, d6, loss2, loss
 
-        if ite_num % 500 == 0:
+        if ite_num % 1000 == 0:
             print("[epoch: %3d/%3d, batch: %5d/%5d, ite: %d] train loss: %3f, tar: %3f " % (
                 epoch + 1, epoch_num, (i + 1) * batch_size_train, train_num, ite_num, running_loss / ite_num4val,
                 running_tar_loss / ite_num4val))
