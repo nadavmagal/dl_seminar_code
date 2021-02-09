@@ -1,6 +1,7 @@
 # MAE, Precision, Recall, F-measure, IoU, Precision-Recall curves
 import numpy as np
 from skimage import io
+from skimage.transform import resize
 
 import matplotlib.pyplot as plt
 
@@ -13,6 +14,7 @@ def compute_mae(mask1,mask2):
 # input 'mask1': HxW or HxWxn (asumme that all the n channels are the same and only the first channel will be used)
 #       'mask2': HxW or HxWxn
 # output: a value MAE, Mean Absolute Error
+
     if(len(mask1.shape)<2 or len(mask2.shape)<2):
         print("ERROR: Mask1 or mask2 is not matrix!")
         exit()
@@ -58,6 +60,10 @@ def compute_ave_MAE_of_methods(gt_name_list,rs_dir_lists):
                 rs = io.imread(rs_dir_lists[j]+gt_name) # read the corresponding mask of each method
             except IOError:
                 #print('ERROR: Couldn\'t find the following file:',rs_dir_lists[j]+gt_name)
+                continue
+            try:
+                rs = resize(rs, (gt.shape[0], gt.shape[1]))
+            except IOError:
                 continue
             try:
                 tmp_mae = compute_mae(gt,rs) # compute the mae
@@ -138,6 +144,7 @@ def compute_PRE_REC_FM_of_methods(gt_name_list,rs_dir_lists,beta=0.3):
             try:
                 rs = io.imread(rs_dir_lists[j]+gt_name) # read the corresponding mask from each method
                 rs = mask_normalize(rs)*255.0 # convert rs to [0,255]
+                rs = resize(rs, (gt.shape[0], gt.shape[1]))
             except IOError:
                 #print('ERROR: Couldn\'t find the following file:',rs_dir_lists[j]+gt_name)
                 continue
@@ -194,7 +201,7 @@ def plot_save_pr_curves(PRE, REC, method_names, lineSylClr, linewidth, xrange=(0
     order = [len(handles)-x for x in range(1,len(handles)+1)]
     plt.legend([handles[idx] for idx in order], [labels[idx] for idx in order],loc='lower left', prop=font1)
     plt.grid(linestyle='--')
-    fig1.savefig(save_dir+dataset_name+"_pr_curves."+save_fmt,bbox_inches='tight',dpi=300)
+    fig1.savefig(save_dir+"_pr_curves."+save_fmt,bbox_inches='tight',dpi=300)
     print('>>PR-curves saved: %s'%(save_dir+dataset_name+"_pr_curves."+save_fmt))
 
 
