@@ -28,6 +28,7 @@ from model.unnet import create_unnet
 from model.unnet_simple import create_unnet_simple
 
 # ------- 1. define loss function --------
+USE_GPU = True
 os.environ["CUDA_VISIBLE_DEVICES"] = "1"
 bce_loss = nn.BCELoss(size_average=True)
 
@@ -79,12 +80,12 @@ batch_size_train = 6  # default 12
 batch_size_val = 1
 train_num = 0
 val_num = 0
-checkpoint_model_path = None
-# checkpoint_model_path = r'/media/nadav/final_project_results/models_u3netp/2021.01.31-19.34/u3netp_epoch_162_bce_itr_54529_train_0.4337340295653644_tar_0.040799249740314285.pth'
+# checkpoint_model_path = None
+checkpoint_model_path = r'/media/nadav/final_project_results/models_unnetp_3/2021.02.07-21.34/unnetp_3_epoch_201_bce_itr_73871_train_0.6975463425005815_tar_0.07573655120879101.pth'
 
 # tra_img_name_list = glob.glob(data_dir + tra_image_dir + '*' + image_ext)
 tra_img_name_list = glob.glob(tra_image_dir + '*' + image_ext)
-# tra_img_name_list = tra_img_name_list[:100]  # TODO: be careful and remove this
+# tra_img_name_list = tra_img_name_list[:1]  # TODO: be careful and remove this
 
 tra_lbl_name_list = []
 for img_path in tra_img_name_list:
@@ -132,7 +133,7 @@ elif (model_name == 'unnetp_4'):
 
 print(f'number of parameters: {sum(p.numel() for p in net.parameters() if p.requires_grad)}')
 
-if torch.cuda.is_available():
+if torch.cuda.is_available() and USE_GPU:
     net.cuda()
 
 # ------- 4. define optimizer --------
@@ -169,7 +170,7 @@ for epoch in range(start_epoch, epoch_num):
         labels = labels.type(torch.FloatTensor)
 
         # wrap them in Variable
-        if torch.cuda.is_available():
+        if torch.cuda.is_available() and USE_GPU:
             inputs_v, labels_v = Variable(inputs.cuda(), requires_grad=False), Variable(labels.cuda(),
                                                                                         requires_grad=False)
         else:
