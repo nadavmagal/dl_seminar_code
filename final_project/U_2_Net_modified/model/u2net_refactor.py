@@ -91,6 +91,7 @@ class U2NET(nn.Module):
             if height < 6:
                 x1 = getattr(self, f'stage{height}')(x)
                 x2 = unet(getattr(self, 'downsample')(x1), height + 1)
+                print('height = ', height)
                 x = getattr(self, f'stage{height}d')(torch.cat((x2, x1), 1))
                 side(x, height)
                 return _upsample_like(x, sizes[height - 1]) if height > 1 else x
@@ -144,7 +145,7 @@ def U2NET_full():
         'stage4d': ['De_4', (4, 1024, 128, 256), 256],
         'stage3d': ['De_3', (5, 512, 64, 128), 128],
         'stage2d': ['De_2', (6, 256, 32, 64), 64],
-        'stage1d': ['De_1', (7, 128, 16, 64), 64],
+        'stage1d': ['De_1', (7, 64, 16, 64), 64],
     }
     return U2NET(cfgs=full, out_ch=1)
 

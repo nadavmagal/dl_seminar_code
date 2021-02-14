@@ -94,11 +94,11 @@ def main():
 
     # --------- 1. get image path and name ---------
     # model_name='u2net'#u2netp
-    model_name= 'u2netp'
-    # model_name= 'u3netp'
+    # model_name= 'u2netp'
+    model_name= 'u3netp'
 
-    # mode = 'save_images'
-    mode = 'mae_acc'
+    mode = 'save_images'
+    # mode = 'mae_acc'
 
     # RUN_ON_GPU = False
     RUN_ON_GPU = True
@@ -116,7 +116,7 @@ def main():
     if not os.path.exists(prediction_dir):
         os.makedirs(prediction_dir, exist_ok=True)
     # model_dir = os.path.join(os.getcwd(), 'saved_models', model_name, model_name + '.pth')
-    model_dir = r'/media/nadav/final_project_results/models/2021.01.26-22.09/u2netp_epoch_1347_bce_itr_383680_train_0.25893394684588367_tar_0.022625727974809707.pth'
+    model_dir = r'/media/nadav/final_project_results/models_u3netp/val_2021.02.01-17.37/u3netp_ephoch_312_bce_itr_183040_train_0.3527812632012435_tar_0.032091312161355745_valloss_0.971956360543895.pth'
 
     params_to_save = dict()
     params_to_save['model_path'] = model_dir
