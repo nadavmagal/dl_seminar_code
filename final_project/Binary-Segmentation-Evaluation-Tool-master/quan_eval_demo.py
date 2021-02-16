@@ -18,12 +18,15 @@ data_dir = r'../../../datasets/DUTS-TE/'  # set the data directory,
                           # the figures of PR and F-measure curves will be saved in this directory as well
 gt_dir = 'DUTS-TE-Mask' # set the ground truth folder name
 rs_dirs = ['DUTS-TE-Res-U2net/u2netp_epoch_1347_bce_itr_383680_train_0.25893394684588367_tar_0.022625727974809707/2021.02.09-19.40',
-           ]  # set the folder names of different methods
+           'DUTS-TE-Res-U2net/u2netp_ephoch_747_bce_itr_230912_train_0.2811758668712256_tar_0.025253941847371276_valloss_0.9987935651200158/2021.02.11-17.11',
+           'DUTS-TE-Res-U2net/u2netp_epoch_747_bce_itr_45760_train_0.29373008854348553_tar_0.026396556153089147/2021.02.11-16.59',
+           'DUTS-TE-Res-U3net/u3netp_ephoch_636_bce_itr_85888_train_0.27360771753063257_tar_0.02309472444837659_valloss_3.708931065395347/2021.02.09-19.54',
+           'DUTS-TE-Res-U3net/u3netp_ephoch_747_bce_itr_242176_train_0.2612400477783839_tar_0.022259863834981596_valloss_1.5054062861323017/2021.02.11-16.35']  # set the folder names of different methods
                         # 'rs1' contains the result of method1
                         # 'rs2' contains the result of method 2
                         # we suggest to name the folder as the method names because they will be shown in the figures' legend
-lineSylClr = ['r-', 'g-'] # curve style, same size with rs_dirs
-linewidth = [1, 2] # line width, same size with rs_dirs
+lineSylClr = ['r-', 'r--', 'r*', 'g-', 'g--'] # curve style, same size with rs_dirs
+linewidth = [1, 1, 1, 2, 2] # line width, same size with rs_dirs
 # >>>>>>> Above have to be manually configured <<<<<<< #
 
 gt_name_list = glob.glob(data_dir+gt_dir+'/'+'*.png') # get the ground truth file name list
