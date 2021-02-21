@@ -45,6 +45,29 @@ def save_output(image_name,pred,output_dir_w_time):
     cv2.imwrite(os.path.join(output_dir_w_time, os.path.basename(image_name)[:-4] + '.png'), predict_np_255)
 
 
+def save_output_original(image_name,pred,d_dir):
+
+    predict = pred
+    predict = predict.squeeze()
+    predict_np = predict.cpu().data.numpy()
+
+    im = Image.fromarray(predict_np*255).convert('RGB')
+    img_name = image_name.split(os.sep)[-1]
+    image = io.imread(image_name)
+    imo = im.resize((image.shape[1],image.shape[0]),resample=Image.BILINEAR)
+
+    pb_np = np.array(imo)
+
+    aaa = img_name.split(".")
+    bbb = aaa[0:-1]
+    imidx = bbb[0]
+    for i in range(1,len(bbb)):
+        imidx = imidx + "." + bbb[i]
+
+    imo.save(d_dir+imidx+'.png')
+
+
+
 
 def main():
 
@@ -57,7 +80,7 @@ def main():
     # RUN_ON_GPU = False
     RUN_ON_GPU = True
 
-    os.environ["CUDA_VISIBLE_DEVICES"] = "1"
+    os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 
     image_dir = r'../../../datasets/DUTS-TE/DUTS-TE-Image/'
 
@@ -121,7 +144,7 @@ def main():
         pred = normPRED(pred)
 
         # save results to test_results folder
-        save_output(img_name_list[i_test],pred,output_dir_w_time)
+        save_output_original(img_name_list[i_test],pred,output_dir_w_time)
 
         del d1,d2,d3,d4,d5,d6,d7
 
