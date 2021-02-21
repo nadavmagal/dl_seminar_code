@@ -81,7 +81,7 @@ batch_size_val = 1
 train_num = 0
 val_num = 0
 # checkpoint_model_path = None
-checkpoint_model_path = r'/media/nadav/final_project_results/models_unnetp_3/2021.02.07-21.34/unnetp_3_epoch_201_bce_itr_73871_train_0.6975463425005815_tar_0.07573655120879101.pth'
+checkpoint_model_path = r'/media/nadav/final_project_results/models_unnetp_3/2021.02.16-09.13/unnetp_3_epoch_552_bce_itr_38698_train_0.2795550786700013_tar_0.023870516352931533.pth'
 
 # tra_img_name_list = glob.glob(data_dir + tra_image_dir + '*' + image_ext)
 tra_img_name_list = glob.glob(tra_image_dir + '*' + image_ext)
