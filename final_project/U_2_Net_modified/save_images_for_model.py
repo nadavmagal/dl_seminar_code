@@ -73,9 +73,9 @@ def main():
 
     # --------- 1. get image path and name ---------
     # model_name='u2net'#u2netp
-    model_name= 'u2netp'
-    # model_name= 'u3netp'
-    model_dir = r'/media/nadav/final_project_results/models/2021.01.26-22.09_val_and_wo/u2netp_epoch_972_bce_itr_53680_train_0.2752876079217954_tar_0.024310463404452257.pth'
+    # model_name= 'u2netp'
+    model_name= 'u3netp'
+    model_dir = r'/media/nadav/final_project_results/models_u3netp/val_2021.02.21-12.28/u3netp_ephoch_1305_bce_itr_81664_train_0.2280185587376102_tar_0.0187644950135357_valloss_23.65640444726686.pth'
 
     # RUN_ON_GPU = False
     RUN_ON_GPU = True
@@ -144,7 +144,8 @@ def main():
         pred = normPRED(pred)
 
         # save results to test_results folder
-        save_output_original(img_name_list[i_test],pred,output_dir_w_time)
+        # save_output_original(img_name_list[i_test],pred,output_dir_w_time)
+        save_output(img_name_list[i_test],pred,output_dir_w_time)
 
         del d1,d2,d3,d4,d5,d6,d7
 
