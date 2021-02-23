@@ -75,7 +75,7 @@ def main():
     # model_name='u2net'#u2netp
     # model_name= 'u2netp'
     model_name= 'u3netp'
-    model_dir = r'/media/nadav/final_project_results/models_u3netp/val_2021.02.21-12.28/u3netp_ephoch_1305_bce_itr_81664_train_0.2280185587376102_tar_0.0187644950135357_valloss_23.65640444726686.pth'
+    model_dir = r'/media/nadav/final_project_results/models_u3netp/val_2021.02.16-22.58/u3netp_ephoch_1002_bce_itr_35200_train_0.23393689743137325_tar_0.018960884751074693_valloss_6.688648055209393.pth'
 
     # RUN_ON_GPU = False
     RUN_ON_GPU = True
