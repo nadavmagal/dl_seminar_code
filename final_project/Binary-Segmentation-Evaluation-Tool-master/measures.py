@@ -187,8 +187,9 @@ def plot_save_pr_curves(PRE, REC, method_names, lineSylClr, linewidth, xrange=(0
     plt.yticks(xyrange2,fontsize=15,fontname='serif')
 
     ## draw dataset name
-    plt.text((xrange[0]+xrange[1])/2.0,yrange[0]+0.02,dataset_name,horizontalalignment='center',fontsize=20, fontname='serif',fontweight='bold')
+    # plt.title((xrange[0]+xrange[1])/2.0,yrange[0]+0.02,dataset_name,horizontalalignment='center',fontsize=20, fontname='serif',fontweight='bold')
 
+    plt.title(dataset_name,fontsize=20, fontname='serif', fontweight='bold')
     plt.xlabel('Recall',fontsize=20,fontname='serif')
     plt.ylabel('Precision',fontsize=20,fontname='serif')
 
@@ -224,8 +225,9 @@ def plot_save_fm_curves(FM, mybins, method_names, lineSylClr, linewidth, xrange=
     plt.yticks(xyrange2,fontsize=15,fontname='serif')
 
     ## draw dataset name
-    plt.text((xrange[0]+xrange[1])/2.0,yrange[0]+0.02,dataset_name,horizontalalignment='center',fontsize=20, fontname='serif',fontweight='bold')
+    # plt.title((xrange[0]+xrange[1])/2.0,yrange[0]+0.02,dataset_name,horizontalalignment='center',fontsize=20, fontname='serif',fontweight='bold')
 
+    plt.title(dataset_name,fontsize=20, fontname='serif', fontweight='bold')
     plt.xlabel('Thresholds',fontsize=20,fontname='serif')
     plt.ylabel('F-measure',fontsize=20,fontname='serif')
 
